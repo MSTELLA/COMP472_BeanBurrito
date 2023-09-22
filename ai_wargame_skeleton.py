@@ -99,6 +99,9 @@ class Unit:
             return 9 - target.health
         return amount
 
+    # def validate_move_direction(self,CoordPair) -> boolean:
+        # TODO specific allowed moves for the player type and unit type (must receive already validated coordinates)
+
 ##############################################################################################################
 
 @dataclass(slots=True)
@@ -186,6 +189,10 @@ class CoordPair:
             for col in range(self.src.col,self.dst.col+1):
                 yield Coord(row,col)
 
+    def move_directionality(self) -> str:
+        """ Return the directionality of the movement"""
+        #TODO (up, down, left, right)
+
     @classmethod
     def from_quad(cls, row0: int, col0: int, row1: int, col1: int) -> CoordPair:
         """Create a CoordPair from 4 integers."""
@@ -211,6 +218,7 @@ class CoordPair:
             return coords
         else:
             return None
+    
 
 ##############################################################################################################
 
@@ -247,6 +255,8 @@ class Game:
     stats: Stats = field(default_factory=Stats)
     _attacker_has_ai : bool = True
     _defender_has_ai : bool = True
+    move_handler=MoveHandler() # TODO : ADDED THIS
+    output_handler=OutputHandler() # TODO
 
     def __post_init__(self):
         """Automatically called after class init to set up the default board state."""
@@ -311,20 +321,25 @@ class Game:
 
     def is_valid_move(self, coords : CoordPair) -> bool:
         """Validate a move expressed as a CoordPair. TODO: WRITE MISSING CODE!!!"""
-        if not self.is_valid_coord(coords.src) or not self.is_valid_coord(coords.dst):
+        if not self.is_valid_coord(coords.src) or not self.is_valid_coord(coords.dst): # If either source or Target are not valid coordinates
             return False
-        unit = self.get(coords.src)
-        if unit is None or unit.player != self.next_player:
+        unit = self.get(coords.src) # Get the Source unit
+        if unit is None or unit.player != self.next_player: # Source coordinate is empty or not the player's unit
             return False
-        unit = self.get(coords.dst)
-        return (unit is None)
+        unit = self.get(coords.dst) # Get target unit
+        #TODO : VERIFY THAT THIS UNIT TYPE CAN MOVE THAT DIRECTION (change the return below) => method validate_move_unit in MoveHandler  
+        return (unit is None) # return false if there is another unit at target, return true if its empty
 
-    def perform_move(self, coords : CoordPair) -> Tuple[bool,str]:
+    def perform_move(self, coords : CoordPair) -> Tuple[bool,str]: #returns (success,result)
         """Validate and perform a move expressed as a CoordPair. TODO: WRITE MISSING CODE!!!"""
-        if self.is_valid_move(coords):
-            self.set(coords.dst,self.get(coords.src))
-            self.set(coords.src,None)
-            return (True,"")
+        if self.is_valid_move(coords): # validates coordinates source and target, as well as move validation for Source unit
+
+            # TODO: HERE MOVE HANDLER IS CALLED AND WILL PERFORM ACTIONS (Removing/Adding Health/Removing from Board)
+            # Also must return string with information
+            
+            self.set(coords.dst,self.get(coords.src)) # src unit is now at destination
+            self.set(coords.src,None) # src unit is no longer at source => not necessarily true for all types of move 
+            return (True,"") # TODO: RETURN STRING THAT DESCRIBES THAT HAPPENED
         return (False,"invalid move")
 
     def next_turn(self):
