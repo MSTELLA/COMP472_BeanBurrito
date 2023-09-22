@@ -63,6 +63,26 @@ class Unit:
         [0,0,0,0,0], # Firewall
     ]
 
+    # class variable: valid move directionality for ATTACKER's units (based on the unit type constants in order)
+    valid_move_attacker : ClassVar[list[list[int]]] = [
+        # UP DOWN LEFT RIGHT
+        [1,0,1,0], # AI UP LEFT
+        [1,1,1,1], # Tech UP DOWN LEFT RIGHT
+        [1,1,1,1], # Virus UP DOWN LEFT RIGHT
+        [1,0,1,0], # Program UP LEFT
+        [1,0,1,0], # Firewall UP LEFT
+    ]
+
+    # class variable: valid move directionality for DEFENDER's units (based on the unit type constants in order)
+    valid_move_defender : ClassVar[list[list[int]]] = [
+        # UP DOWN LEFT RIGHT
+        [0,1,0,1], # AI DOWN RIGHT
+        [1,1,1,1], # Tech UP DOWN LEFT RIGHT
+        [1,1,1,1], # Virus UP DOWN LEFT RIGHT
+        [0,1,0,1], # Program DOWN RIGHT
+        [0,1,0,1], # Firewall DOWN RIGHT
+    ]
+
     def is_alive(self) -> bool:
         """Are we alive ?"""
         return self.health > 0
@@ -99,8 +119,21 @@ class Unit:
             return 9 - target.health
         return amount
 
-    # def validate_move_direction(self,CoordPair) -> boolean:
-        # TODO specific allowed moves for the player type and unit type (must receive already validated coordinates)
+    def validate_move_direction(self,coords:CoordPair) -> boolean:
+        """Validate specific allowed moves for the player type and unit type (must receive already validated coordinates)"""
+        directionality = coords.move_directionality() #sets directionality of CoordPair
+        if directionality==4: # If the source and destination are the same (self-destruct)
+            return true
+        if self.type==1 or self.type==2: # 1:Tech and 2: Virus can move in any direction no matter the Player type
+            return true
+        elif unit.player == 0: # Attacker = 0
+                if self.valid_move_attacker[unit.type,coords.directionality] ==1:
+                    return True
+        else: # player is Defender
+                if self.valid_move_defender[unit.type,coords.directionality] ==1:
+                    return True
+        return False # if all of above fails...            
+
 
 ##############################################################################################################
 
@@ -109,6 +142,7 @@ class Coord:
     """Representation of a game cell coordinate (row, col)."""
     row : int = 0
     col : int = 0
+    
 
     def col_string(self) -> str:
         """Text representation of this Coord's column."""
@@ -170,6 +204,7 @@ class CoordPair:
     """Representation of a game move or a rectangular area via 2 Coords."""
     src : Coord = field(default_factory=Coord)
     dst : Coord = field(default_factory=Coord)
+    directionality : int= -1
 
     def to_string(self) -> str:
         """Text representation of a CoordPair."""
@@ -189,9 +224,16 @@ class CoordPair:
             for col in range(self.src.col,self.dst.col+1):
                 yield Coord(row,col)
 
-    def move_directionality(self) -> str:
-        """ Return the directionality of the movement"""
-        #TODO (up, down, left, right)
+    def move_directionality(self):
+        """ Return the directionality of the movement 0:UP 1:DOWN 2:LEFT 3:RIGHT 4:SAME SPOT"""
+        x_diff = src.row - dst.row
+        y_diff = src.col - dst.col
+        if x_diff > 0: self.directionality=0
+        elif x_diff < 0: self.directionality=1
+        elif y_diff > 0: self.directionality=2
+        elif y_diff < 0: self.directionality=3
+        else : self.directionality=4
+
 
     @classmethod
     def from_quad(cls, row0: int, col0: int, row1: int, col1: int) -> CoordPair:
@@ -320,15 +362,27 @@ class Game:
             self.remove_dead(coord)
 
     def is_valid_move(self, coords : CoordPair) -> bool:
-        """Validate a move expressed as a CoordPair. TODO: WRITE MISSING CODE!!!"""
+        """Validate a move expressed as a CoordPair."""
         if not self.is_valid_coord(coords.src) or not self.is_valid_coord(coords.dst): # If either source or Target are not valid coordinates
             return False
-        unit = self.get(coords.src) # Get the Source unit
-        if unit is None or unit.player != self.next_player: # Source coordinate is empty or not the player's unit
+
+        src_unit = self.get(coords.src) # Get the Source unit
+        dst_unit = self.get(coords.dst) # Get target unit
+
+        if src_unit is None or src_unit.player != self.next_player: # Source coordinate is empty or not the player's unit
             return False
-        unit = self.get(coords.dst) # Get target unit
-        #TODO : VERIFY THAT THIS UNIT TYPE CAN MOVE THAT DIRECTION (change the return below) => method validate_move_unit in MoveHandler  
-        return (unit is None) # return false if there is another unit at target, return true if its empty
+        
+        # Validation that this type of unit for this player type can move in this direction
+        valid_direction = move_handler.valid_direction(src_unit,coords)
+
+        # Validation that this unit is not engaged in combat(Only 0:AI, 3:Program and 4:Firewall cannot move if engaged in combat)
+        valid_engaged_in_combat=move_handler.valid_engaged_in_combat(src_unit, self.board, coords.src)
+
+        # TODO: VALIDATE MOVEMENT
+        # TODO: VALIDATE ATTACK
+        # TODO: VALIDATE REPAIR
+        # TODO: VALIDATE SELFDESTRUCT
+        # return (dst_unit is None) # return false if there is another unit at target, return true if its empty
 
     def perform_move(self, coords : CoordPair) -> Tuple[bool,str]: #returns (success,result)
         """Validate and perform a move expressed as a CoordPair. TODO: WRITE MISSING CODE!!!"""
@@ -336,7 +390,7 @@ class Game:
 
             # TODO: HERE MOVE HANDLER IS CALLED AND WILL PERFORM ACTIONS (Removing/Adding Health/Removing from Board)
             # Also must return string with information
-            
+
             self.set(coords.dst,self.get(coords.src)) # src unit is now at destination
             self.set(coords.src,None) # src unit is no longer at source => not necessarily true for all types of move 
             return (True,"") # TODO: RETURN STRING THAT DESCRIBES THAT HAPPENED

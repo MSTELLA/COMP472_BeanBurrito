@@ -2,29 +2,37 @@
 class MoveHandler:
 
     type=""
-    directionality=""
     action_consequence=""
-
-
-    def validate_move_unit(playerType, unit, CoordPair) -> boolean:
-        """ Verifies that the unit at source coordinated is allowed to do the move"""
-
-        # Will use new method for unit to check validity of direcitonality
-            # this method will use Coordpair new method to figure if its left right up down
-            # ALSO CHECK ENGAGED IN COMBAT OR NOT ( Only AI, Firewall and program)
-        return True
-
+    valid_direction=False
+    valid_engaged_in_combat=False
     # AI = 0
     # Tech = 1
     # Virus = 2
     # Program = 3
     # Firewall = 4
 
-    # def engaged_in_combat():
-        # TODO must iterate around and see if there are any
+    def valid_direction(src_unit:Unit, coords: CoordPair):
+        self.valid_direction = src_unit.validate_move_direction(coords) 
+        return self.valid_direction
+
+    # def valid_engaged_in_combat(src_unit:Unit, src:Coord, board):
+        # TODO must iterate around and see if there are any adverserial units around => should be in game class or unit class?
+        # if src_unit.type==0 or src_unit.type==3 or src_unit.type==4:
+            
+            
+        # else:
+        #     self.valid_engaged_in_combat=True
+        # return self.valid_engaged_in_combat
+
+    # def action_type():
+        # after all validations
+        # if target coordinate empty => movement
+        # if target enemy => attack
+        # if target ally => repair (have to validate also)
+        # if target same (directionality is 4) => self-destruct 
 
     # def movement():
-        # TODO?
+    
 
     # def attack():
     
