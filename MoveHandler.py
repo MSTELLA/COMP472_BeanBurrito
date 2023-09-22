@@ -16,13 +16,13 @@ class MoveHandler:
         return self.valid_direction
 
     # def valid_engaged_in_combat(src_unit:Unit, src:Coord, board):
-        # TODO must iterate around and see if there are any adverserial units around => should be in game class or unit class?
-        # if src_unit.type==0 or src_unit.type==3 or src_unit.type==4:
+    #     # TODO must iterate around and see if there are any adverserial units around
+    #     if src_unit.type==0 or src_unit.type==3 or src_unit.type==4:
             
             
-        # else:
-        #     self.valid_engaged_in_combat=True
-        # return self.valid_engaged_in_combat
+    #     else:
+    #         self.valid_engaged_in_combat=True
+    #     return self.valid_engaged_in_combat
 
     # def action_type():
         # after all validations
@@ -32,7 +32,6 @@ class MoveHandler:
         # if target same (directionality is 4) => self-destruct 
 
     # def movement():
-    
 
     # def attack():
     
@@ -42,5 +41,6 @@ class MoveHandler:
 
     def clear_move(self):
         self.type=""
-        self.directionality=""
         self.action_consequence=""
+        self.valid_direction=False
+        self.valid_engaged_in_combat=False
