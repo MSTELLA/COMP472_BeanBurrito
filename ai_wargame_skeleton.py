@@ -8,6 +8,7 @@ from time import sleep
 from typing import Tuple, TypeVar, Type, Iterable, ClassVar
 import random
 # import requests
+from MoveHandler import MoveHandler
 
 # maximum and minimum values for our heuristic scores (usually represents an end of game condition)
 MAX_HEURISTIC_SCORE = 2000000000
@@ -121,16 +122,16 @@ class Unit:
 
     def validate_move_direction(self,coords:CoordPair) -> boolean:
         """Validate specific allowed moves for the player type and unit type (must receive already validated coordinates)"""
-        directionality = coords.move_directionality() #sets directionality of CoordPair
+        directionality = coords.move_directionality() #sets directionality of CoordPair and returns it
         if directionality==4: # If the source and destination are the same (self-destruct)
             return true
-        if self.type==1 or self.type==2: # 1:Tech and 2: Virus can move in any direction no matter the Player type
+        if self.type.value==1 or self.type.value==2: # 1:Tech and 2: Virus can move in any direction no matter the Player type
             return true
-        elif unit.player == 0: # Attacker = 0
-                if self.valid_move_attacker[unit.type,coords.directionality] ==1:
+        elif self.player.value == 0: # Attacker = 0
+                if self.valid_move_attacker[self.type.value][coords.directionality] ==1:
                     return True
         else: # player is Defender
-                if self.valid_move_defender[unit.type,coords.directionality] ==1:
+                if self.valid_move_defender[self.type.value][coords.directionality] ==1:
                     return True
         return False # if all of above fails...            
 
@@ -183,6 +184,8 @@ class Coord:
         yield Coord(self.row+1,self.col)
         yield Coord(self.row,self.col+1)
 
+        
+
     @classmethod
     def from_string(cls, s : str) -> Coord | None:
         """Create a Coord from a string. ex: D2."""
@@ -226,13 +229,24 @@ class CoordPair:
 
     def move_directionality(self):
         """ Return the directionality of the movement 0:UP 1:DOWN 2:LEFT 3:RIGHT 4:SAME SPOT"""
-        x_diff = src.row - dst.row
-        y_diff = src.col - dst.col
-        if x_diff > 0: self.directionality=0
-        elif x_diff < 0: self.directionality=1
-        elif y_diff > 0: self.directionality=2
-        elif y_diff < 0: self.directionality=3
-        else : self.directionality=4
+        x_diff = self.src.row - self.dst.row
+        y_diff = self.src.col - self.dst.col
+        if x_diff > 0: 
+            self.directionality=0 
+            print("STEPS: directionality registered as UP")
+        elif x_diff < 0: 
+            self.directionality=1
+            print("STEPS: directionality registered as DOWN")
+        elif y_diff > 0: 
+            self.directionality=2
+            print("STEPS: directionality registered as LEFT")
+        elif y_diff < 0: 
+            self.directionality=3
+            print("STEPS: directionality registered as RIGHT")
+        else : 
+            self.directionality=4
+            print("STEPS: directionality registered as nothing :(")
+        return self.directionality
 
 
     @classmethod
@@ -298,7 +312,7 @@ class Game:
     _attacker_has_ai : bool = True
     _defender_has_ai : bool = True
     move_handler=MoveHandler() # TODO : ADDED THIS
-    output_handler=OutputHandler() # TODO
+    # output_handler=OutputHandler() # TODO
 
     def __post_init__(self):
         """Automatically called after class init to set up the default board state."""
@@ -361,39 +375,66 @@ class Game:
             target.mod_health(health_delta)
             self.remove_dead(coord)
 
-    def is_valid_move(self, coords : CoordPair) -> bool:
+    def is_valid_move(self, coords : CoordPair)-> bool:
         """Validate a move expressed as a CoordPair."""
         if not self.is_valid_coord(coords.src) or not self.is_valid_coord(coords.dst): # If either source or Target are not valid coordinates
+            print("The source or destination coordinates are not on the board.")
             return False
 
-        src_unit = self.get(coords.src) # Get the Source unit
-        dst_unit = self.get(coords.dst) # Get target unit
+        src_unit = self.get(coords.src) # Get Source unit
+        dst_unit = self.get(coords.dst) # Get Destination unit
 
         if src_unit is None or src_unit.player != self.next_player: # Source coordinate is empty or not the player's unit
+            print("The Source coordinates contain no unit or contain an adversary unit")
             return False
-        
-        # Validation that this type of unit for this player type can move in this direction
-        valid_direction = move_handler.valid_direction(src_unit,coords)
 
-        # Validation that this unit is not engaged in combat(Only 0:AI, 3:Program and 4:Firewall cannot move if engaged in combat)
-        valid_engaged_in_combat=move_handler.valid_engaged_in_combat(src_unit, self.board, coords.src)
+        # DETERMINE TYPE OF ACTION
+        self.move_handler.action_type(src_unit,dst_unit,CoordPair) # sets action type
+        action_type= self.move_handler.ACTION.value # 0: Movement 1: Attack 2: Repair 3: Self-Destruct
+        print("STEPS: Action determined to be #",action_type)
 
-        # TODO: VALIDATE MOVEMENT
-        # TODO: VALIDATE ATTACK
-        # TODO: VALIDATE REPAIR
         # TODO: VALIDATE SELFDESTRUCT
-        # return (dst_unit is None) # return false if there is another unit at target, return true if its empty
+        if action_type==3:
+            # move_handler.validate_selfDestruct() => not necessary
+            return True
+        # VALIDATE MOVEMENT
+        elif action_type==0:
+            return self.move_handler.validate_movement(src_unit, coords, self.board)
+
+        # TODO: VALIDATE ATTACK
+        # elif action_type==1:
+        
+        # TODO: VALIDATE REPAIR
+        # elif action_type==2:
+        else:
+            return False
 
     def perform_move(self, coords : CoordPair) -> Tuple[bool,str]: #returns (success,result)
-        """Validate and perform a move expressed as a CoordPair. TODO: WRITE MISSING CODE!!!"""
-        if self.is_valid_move(coords): # validates coordinates source and target, as well as move validation for Source unit
+        """Validate and perform a move expressed as a CoordPair."""
 
+        if self.is_valid_move(coords): # validates coordinates source and target, sets action type and validates it
+            print("STEPS: Will now perform move")
             # TODO: HERE MOVE HANDLER IS CALLED AND WILL PERFORM ACTIONS (Removing/Adding Health/Removing from Board)
-            # Also must return string with information
+            #  Also must return string with information
 
-            self.set(coords.dst,self.get(coords.src)) # src unit is now at destination
-            self.set(coords.src,None) # src unit is no longer at source => not necessarily true for all types of move 
-            return (True,"") # TODO: RETURN STRING THAT DESCRIBES THAT HAPPENED
+            action_type= self.move_handler.ACTION.value # 0: Movement 1: Attack 2: Repair 3: Self-Destruct
+            # TODO: PERFORM SELF-DESTRUCT
+            if action_type==3:
+                #TODO
+                return(True,"Self-Destruction Completed")
+                
+            #PERFORM MOVEMENT
+            elif action_type==0:
+                self.board=self.move_handler.movement(self.board,self.get(coords.src),coords)
+                # self.set(coords.dst,self.get(coords.src)) # src unit is now at destination
+                # self.set(coords.src,None) # src unit is no longer at source
+                return(True,self.move_handler.action_consequence)
+
+            #TODO: PERFORM ATTACK
+            # elif action_type==1:
+            #TODO: PERFORM REPAIR
+            # elif action_type==2:
+            return (True,"") # TODO: RETURN STRING THAT DESCRIBES WHAT HAPPENED
         return (False,"invalid move")
 
     def next_turn(self):
