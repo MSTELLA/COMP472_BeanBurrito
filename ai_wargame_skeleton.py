@@ -49,6 +49,9 @@ class Unit:
     health : int = 9
     # class variable: damage table for units (based on the unit type constants in order)
     damage_table : ClassVar[list[list[int]]] = [
+        # S depicts the row and then T depicts the column, S attacks T
+        # S attacks T, S damages T but T also damages S
+        # AI, Tech, Virus, Program, Firewall
         [3,3,3,3,1], # AI
         [1,1,6,1,1], # Tech
         [9,6,1,6,1], # Virus
@@ -434,14 +437,20 @@ class Game:
                 print("SD STEPS: Will now clean up board")
                 self.clean_up_board()
                 return(True,self.move_handler.action_consequence)
+            
+            # PERFORM ATTACK
+            if action_type==2:
+                print("Attack STEPS: Will now perform an Attack")
+                self.board=self.move_handler.attack(self.get(coords.src), self.get(coords.dst), coords)
+                print("Attack STEPS: Will now clean up board")
+                self.clean_up_board()
+                return(True,self.move_handler.action_consequence)
                 
             #PERFORM MOVEMENT
             elif action_type==0:
                 self.board=self.move_handler.movement(self.board,self.get(coords.src),coords)
                 return(True,self.move_handler.action_consequence)
-
-            #TODO: PERFORM ATTACK
-            # elif action_type==1:
+            
             #TODO: PERFORM REPAIR
             # elif action_type==2:
             return (True,"") # TODO: RETURN STRING THAT DESCRIBES WHAT HAPPENED

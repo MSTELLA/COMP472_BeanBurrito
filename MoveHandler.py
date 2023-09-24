@@ -17,7 +17,7 @@ class MoveHandler:
     # Program = 3
     # Firewall = 4
 
-    def action_type(self,src_unit, dst_unit, coords):
+    def action_type(self, src_unit, dst_unit, coords):
         # after validations: Coords are on the board, unit belongs to player, src is not empty
         # if target and source are the same (directionality is 4) => self-destruct 
         if coords.directionality==4:
@@ -37,7 +37,7 @@ class MoveHandler:
         self.action_consequence=""
 
 #---------------------------------- MOVEMENT ---------------------------------- #
-    def validate_movement(self,src_unit, coords, board) -> bool:
+    def validate_movement(self, src_unit, coords, board) -> bool:
         """ Validates that this unit can perform this movement and isn't restrained by being engaged in combat"""
         # Validation that this type of unit for this player type can move in this direction
         valid_direction = self.valid_direction(src_unit,coords)
@@ -47,13 +47,13 @@ class MoveHandler:
         self.movement_string(src_unit, coords)
         return (valid_direction and valid_engaged_in_combat)
 
-    def valid_direction(self,src_unit, coords)-> bool:
+    def valid_direction(self, src_unit, coords)-> bool:
         valid_direction=src_unit.validate_move_direction(coords)
         if not valid_direction:
             self.action_consequence="Unit cannot move in that direction."
         return valid_direction
         
-    def valid_engaged_in_combat(self,src_unit, src_coord, board)-> bool:
+    def valid_engaged_in_combat(self, src_unit, src_coord, board)-> bool:
         """ Iterate around source coordinates and see if there are any adverserial units around """
         valid_engaged_in_combat=True
         dim = len(board)
@@ -72,14 +72,47 @@ class MoveHandler:
         self.action_consequence="Movement Action Performed. " + src_unit.type.name + " Unit at " + coords.src.to_string() + " is now at " + coords.dst.to_string()
         #TODO: FORMAT THIS STRING
 
-    def movement(self,board,src_unit, coords):
+    def movement(self, board, src_unit, coords):
         board[coords.dst.row][coords.dst.col]=src_unit
         board[coords.src.row][coords.src.col]=None
         return board
 
 #---------------------------------- ATTACK ---------------------------------- #
 
-    # def attack():
+    def attack_string(self, src_unit, dst_unit, coords):
+        self.action_consequence="Attack Action Performed. " + src_unit.type.name + " Unit at " + coords.src.to_string() + " has attacked "  + dst_unit.type.name + " Unit at " + coords.dst.to_string() + ". "
+        + src_unit.type.name + " Unit took " + dst_unit.damage_amount(src_unit) + " damage. "
+        + dst_unit.type.name + " Unit took " + src_unit.damage_amount(dst_unit) + " damage. "
+
+    def validate_attack(self, src_unit, dst_unit, coords)-> bool:
+        self.ACTION=ACTION(1)
+        src_unit.validate_move_direction(coords)
+        # first check that the src_unit and dst_unit are adjacent
+        # units are on adjacent teams
+        valid_attack = False
+        for adjacent_coord in coords.src.iter_adjacent():
+            if (adjacent_coord == coords.dst): 
+                valid_attack = True 
+        return valid_attack 
+
+    def attack(self, src_unit, dst_unit, coords):
+        if (self.validate_attack(src_unit, dst_unit, coords)):
+                # combat is bi-directional,  if S attacks T, S damages T but T also damages S
+                # meaning that if S attacks T, S does an attack damage to T, but T also does its attack damage to S
+                dst_dmg = src_unit.damage_amount(dst_unit)
+                src_dmg = dst_unit.damage_amount(src_unit)
+
+                if ((dst_unit.health - dst_dmg) > 0): # damage below 0 they are killed, damage_amount return target health when they are killed
+                    dst_unit.health = dst_unit.health - dst_dmg
+                else: dst_unit.health = 0 # unit died
+                
+                if ((src_unit.health - src_dmg) > 0): # damage below 0 they are killed, damage_amount return target health when they are killed
+                    src_unit.health = src_unit.health - src_dmg
+                else: src_unit.health = 0 # unit died
+                
+                self.attack_string(src_unit, dst_unit, coords)
+        else:
+            self.action_consequence = "Unit cannot attack: Targeted unit not adjacent!"
 
 #---------------------------------- REPAIR ---------------------------------- #
 
@@ -87,7 +120,7 @@ class MoveHandler:
 
 #---------------------------------- SELF-DESTRUCT ---------------------------------- #
 
-    def validate_selfdestruct(self,src_unit, coords):
+    def validate_selfdestruct(self, src_unit, coords):
         """ Sets Action type in MoveHandler"""
         self.ACTION=ACTION(3)
         src_unit.validate_move_direction(coords)
