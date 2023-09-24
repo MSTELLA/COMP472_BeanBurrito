@@ -9,6 +9,7 @@ from typing import Tuple, TypeVar, Type, Iterable, ClassVar
 import random
 import requests
 from MoveHandler import MoveHandler
+from OutputHandler import OutputHandler
 
 # maximum and minimum values for our heuristic scores (usually represents an end of game condition)
 MAX_HEURISTIC_SCORE = 2000000000
@@ -315,8 +316,8 @@ class Game:
     stats: Stats = field(default_factory=Stats)
     _attacker_has_ai : bool = True
     _defender_has_ai : bool = True
-    move_handler=MoveHandler() # TODO : ADDED THIS
-    # output_handler=OutputHandler() # TODO
+    move_handler=MoveHandler()
+    output_handler=OutputHandler()
 
     def __post_init__(self):
         """Automatically called after class init to set up the default board state."""
@@ -467,6 +468,31 @@ class Game:
         output = ""
         output += f"Next player: {self.next_player.name}\n"
         output += f"Turns played: {self.turns_played}\n"
+        coord = Coord()
+        output += "\n   "
+        for col in range(dim):
+            coord.col = col
+            label = coord.col_string()
+            output += f"{label:^3} "
+        output += "\n"
+        for row in range(dim):
+            coord.row = row
+            label = coord.row_string()
+            output += f"{label}: "
+            for col in range(dim):
+                coord.col = col
+                unit = self.get(coord)
+                if unit is None:
+                    output += " .  "
+                else:
+                    output += f"{str(unit):^3} "
+            output += "\n"
+        return output
+    
+    def board_print(self) -> str:
+        """Board Print"""
+        dim = self.options.dim
+        output = ""
         coord = Coord()
         output += "\n   "
         for col in range(dim):
@@ -683,7 +709,7 @@ def main():
     # set up game options
     options = Options(game_type=game_type)
 
-    # override class defaults via command line options
+    # override class defaults via command line options # TODO
     if args.max_depth is not None:
         options.max_depth = args.max_depth
     if args.max_time is not None:
@@ -694,6 +720,11 @@ def main():
     # create a new game
     game = Game(options=options)
 
+    #  OutputHandler creates the game file and writes the game parameters
+    game.output_handler.setupfile(game.options)
+
+    # PRINT TITLE
+
     # the main game loop
     while True:
         print()
@@ -701,6 +732,8 @@ def main():
         winner = game.has_winner()
         if winner is not None:
             print(f"{winner.name} wins!")
+            game.output_handler.write_turn(game)
+            game.output_handler.write_end_game(winner.name,game.turns_played) 
             break
         if game.options.game_type == GameType.AttackerVsDefender:
             game.human_turn()
@@ -716,6 +749,7 @@ def main():
             else:
                 print("Computer doesn't know what to do!!!")
                 exit(1)
+        # TODO: OUTPUT HANDLER writes turn information
 
 ##############################################################################################################
 

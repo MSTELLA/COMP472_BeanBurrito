@@ -10,6 +10,7 @@ class ACTION(Enum):
 class MoveHandler:
     ACTION: ACTION.Movement
     action_consequence=""
+    coords = None
 
     # AI = 0
     # Tech = 1
@@ -20,6 +21,7 @@ class MoveHandler:
     def action_type(self, src_unit, dst_unit, coords):
         # after validations: Coords are on the board, unit belongs to player, src is not empty
         # if target and source are the same (directionality is 4) => self-destruct 
+        self.coords=coords
         if coords.directionality==4:
             self.ACTION = ACTION.SelfDestruct
         # if target coordinate empty => movement
@@ -70,7 +72,6 @@ class MoveHandler:
 
     def movement_string(self, src_unit, coords):
         self.action_consequence="Movement Action Performed. " + src_unit.type.name + " Unit at " + coords.src.to_string() + " is now at " + coords.dst.to_string()
-        #TODO: FORMAT THIS STRING
 
     def movement(self, board, src_unit, coords):
         board[coords.dst.row][coords.dst.col]=src_unit

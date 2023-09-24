@@ -1,0 +1,16 @@
+Game Parameters:
+ Timeout: 5.0 seconds
+ Max number of turns: 100
+ Play mode: AttackerVsDefender
+Turn #1
+ Defender: SelfDestruct from E4 to E4
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .   .  aF7 aV7 
+E:  .   .  aP9 aV7  .  
+
+
+End of Game! Defender wins in 1 turns.
