@@ -411,14 +411,15 @@ class Game:
             #coordinates and unit belonging to player already validated
             self.move_handler.validate_selfdestruct(src_unit, coords)
             return True
+        
+        # VALIDATE ATTACK
+        elif action_type==1:
+            return self.move_handler.validate_attack(src_unit, dst_unit, coords)
 
         # VALIDATE MOVEMENT
         elif action_type==0:
             return self.move_handler.validate_movement(src_unit, coords, self.board)
 
-        # TODO: VALIDATE ATTACK
-        # elif action_type==1:
-        
         # TODO: VALIDATE REPAIR
         # elif action_type==2:
         else:
@@ -440,9 +441,9 @@ class Game:
                 return(True,self.move_handler.action_consequence)
             
             # PERFORM ATTACK
-            if action_type==2:
+            if action_type==1:
                 print("Attack STEPS: Will now perform an Attack")
-                self.board=self.move_handler.attack(self.get(coords.src), self.get(coords.dst), coords)
+                self.move_handler.attack(self.get(coords.src), self.get(coords.dst), coords)
                 print("Attack STEPS: Will now clean up board")
                 self.clean_up_board()
                 return(True,self.move_handler.action_consequence)
