@@ -80,9 +80,10 @@ class MoveHandler:
 #---------------------------------- ATTACK ---------------------------------- #
 
     def attack_string(self, src_unit, dst_unit, coords):
-        self.action_consequence="Attack Action Performed. " + src_unit.type.name + " Unit at " + coords.src.to_string() + " has attacked "  + dst_unit.type.name + " Unit at " + coords.dst.to_string() + ". "
-        + src_unit.type.name + " Unit took " + dst_unit.damage_amount(src_unit) + " damage. "
-        + dst_unit.type.name + " Unit took " + src_unit.damage_amount(dst_unit) + " damage. "
+        self.action_consequence="Attack Action Performed. \n" 
+        + src_unit.type.name + " Unit at " + coords.src.to_string() + " has attacked "  + dst_unit.type.name + " Unit at " + coords.dst.to_string() + ". \n"
+        + src_unit.type.name + " Unit took " + dst_unit.damage_amount(src_unit) + " damage. \n"
+        + dst_unit.type.name + " Unit took " + src_unit.damage_amount(dst_unit) + " damage. \n"
 
     def validate_attack(self, src_unit, dst_unit, coords)-> bool:
         self.ACTION=ACTION(1)
