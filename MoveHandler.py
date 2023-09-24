@@ -81,9 +81,20 @@ class MoveHandler:
 #---------------------------------- ATTACK ---------------------------------- #
 
     def attack_string(self, src_unit, dst_unit, coords):
+        damage = ""
+        # if the destination unit destroyed
+        if (dst_unit.damage_amount(src_unit) == 0):
+            damage = damage + src_unit.type.name + " Unit destroyed !"
+        else:
+            damage = damage + src_unit.type.name + " Unit took " + str(dst_unit.damage_amount(src_unit)) + " damage. \n"
+        # if the source unit destroyed
+        if (src_unit.damage_amount(dst_unit) == 0):
+            damage = damage + dst_unit.type.name + " Unit destroyed !"
+        else:
+            damage = damage + dst_unit.type.name + " Unit took " + str(src_unit.damage_amount(dst_unit)) + " damage. \n"
+
         action = src_unit.type.name + " Unit at " + coords.src.to_string() + " has attacked " + dst_unit.type.name + " Unit at " + coords.dst.to_string() + ". \n"
-        damage = src_unit.type.name + " Unit took " + str(dst_unit.damage_amount(src_unit)) + " damage. \n" + dst_unit.type.name + " Unit took " + str(src_unit.damage_amount(dst_unit)) + " damage. \n"
-        self.action_consequence= "Attack Action Performed. \n" + action + damage
+        self.action_consequence= "Attack Action Performed. " + action + damage
 
     def validate_attack(self, src_unit, dst_unit, coords)-> bool:
         self.ACTION=ACTION(1)
