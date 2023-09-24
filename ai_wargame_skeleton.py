@@ -120,7 +120,7 @@ class Unit:
             return 9 - target.health
         return amount
 
-    def validate_move_direction(self,coords:CoordPair) -> boolean:
+    def validate_move_direction(self,coords:CoordPair) -> bool:
         """Validate specific allowed moves for the player type and unit type (must receive already validated coordinates)"""
         directionality = coords.directionality #sets directionality of CoordPair and returns it
         if directionality==4: # If the source and destination are the same (self-destruct)
@@ -381,6 +381,11 @@ class Game:
             target.mod_health(health_delta)
             self.remove_dead(coord)
 
+    def is_adjacent(self, src_coord, dst_coord: Coord) -> bool:
+        """Boolean function that returns T/F based on if target code is
+        in the adjacent list (using iter_adjacent() method )"""
+        return dst_coord in list(src_coord.iter_adjacent())
+
     def is_valid_move(self, coords : CoordPair)-> bool:
         """Validate a move expressed as a CoordPair."""
         if not self.is_valid_coord(coords.src) or not self.is_valid_coord(coords.dst): # If either source or Target are not valid coordinates
@@ -416,7 +421,24 @@ class Game:
         # elif action_type==1:
         
         # TODO: VALIDATE REPAIR
-        # elif action_type==2:
+        elif action_type==2:
+            #Verify if targeted unit is enemy or friendly (is None verifies if dst_unit == NULL)
+            if dst_unit is None or dst_unit.player != self.next_player:
+                print("Invalid repair, area selected does not contain an ally unit")
+                return False
+            #Verify if targeted unit is already at full health  
+            if dst_unit.health >= 9:
+                print("Invalid move, Unit is at full health. \n")
+                return False 
+            #verify if targeted unit is adjacent or not to our repair unit
+            if not self.is_adjacent(coords.src, coords.dst):
+                print("Illegal repair move, Targeted unit needs to be adjacent to healing unit")
+                return False
+            #verify if unit can repair another unit 
+            if src_unit.repair_amount(dst_unit) == 0:
+                print("Invalid, the following unit cannot repair another unit!")
+                return False
+            return True
         else:
             return False
 
@@ -443,7 +465,10 @@ class Game:
             #TODO: PERFORM ATTACK
             # elif action_type==1:
             #TODO: PERFORM REPAIR
-            # elif action_type==2:
+            elif action_type==2:
+                self.board = self.move_handler.repair(self.board, self.get(coords.src),coords.dst) 
+                return(True,self.move_handler.action_consequence)
+                
             return (True,"") # TODO: RETURN STRING THAT DESCRIBES WHAT HAPPENED
         return (False,"invalid move")
 

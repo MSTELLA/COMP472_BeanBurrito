@@ -1,5 +1,10 @@
 from enum import Enum
 
+
+
+
+
+
 class ACTION(Enum):
     """Every Action type."""
     Movement = 0
@@ -83,7 +88,31 @@ class MoveHandler:
 
 #---------------------------------- REPAIR ---------------------------------- #
 
-    # def repair():
+
+    
+    #Method that will be used to generate a string describing the repair (wil be used by output handler)
+    def repair_string(self, src_unit, dst_coord, repair_value):
+        self.action_consequence = "Repair Action Performed." +  src_unit.type.name + " Unit at " + src_unit.to_string() + "repaired" + dst_coord.to_string() + "by" + repair_value + "points"
+
+                                                                                              
+
+
+    def repair(self, board, src_unit, src_coordinates, dst_coordinates):
+        #Setting the target goal 
+        dstUnit = board[dst_coordinates.row][dst_coordinates.col]
+
+        #Using accessor repair_amount to calculate the total repair
+        repairVal = src_unit.repair_amount(dstUnit) #repair_amount gets value from table provided 
+
+        #Using mutator method mod_health to modify unit's health
+        dstUnit.mod_health(repairVal)
+
+        self.repair_string(src_unit, src_coordinates,dst_coordinates,repairVal)
+
+        return board
+    
+
+
 
 #---------------------------------- SELF-DESTRUCT ---------------------------------- #
 
