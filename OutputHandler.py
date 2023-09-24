@@ -6,6 +6,7 @@ class OutputHandler:
 
     def setupfile(self,options):
         """ Creates File with appropriate filename and writes Game parameters"""
+        # WE SHOULD ERASE FIRST
         self.generate_filename(options.alpha_beta, options.max_time, options.max_turns)
         self.filepath="./" + self.filename
         self.write_to_file(self.filepath,self.start_game_string(options))

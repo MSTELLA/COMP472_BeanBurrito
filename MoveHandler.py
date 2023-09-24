@@ -81,17 +81,20 @@ class MoveHandler:
 #---------------------------------- ATTACK ---------------------------------- #
 
     def attack_string(self, src_unit, dst_unit, coords):
+        dst_dmg = src_unit.damage_amount(dst_unit)
+        src_dmg = dst_unit.damage_amount(src_unit)
+
         damage = ""
         # if the destination unit destroyed
-        if (dst_unit.damage_amount(src_unit) == 0):
-            damage = damage + src_unit.type.name + " Unit destroyed !"
+        if (src_dmg == 0):
+            damage = damage + src_unit.type.name + " Unit destroyed! "
         else:
-            damage = damage + src_unit.type.name + " Unit took " + str(dst_unit.damage_amount(src_unit)) + " damage. \n"
+            damage = damage + src_unit.type.name + " Unit took " + str(src_dmg) + " damage. \n"
         # if the source unit destroyed
-        if (src_unit.damage_amount(dst_unit) == 0):
-            damage = damage + dst_unit.type.name + " Unit destroyed !"
+        if (dst_dmg == 0):
+            damage = damage + dst_unit.type.name + " Unit destroyed! "
         else:
-            damage = damage + dst_unit.type.name + " Unit took " + str(src_unit.damage_amount(dst_unit)) + " damage. \n"
+            damage = damage + dst_unit.type.name + " Unit took " + str(dst_dmg) + " damage. \n"
 
         action = src_unit.type.name + " Unit at " + coords.src.to_string() + " has attacked " + dst_unit.type.name + " Unit at " + coords.dst.to_string() + ". \n"
         self.action_consequence= "Attack Action Performed. " + action + damage
@@ -106,24 +109,27 @@ class MoveHandler:
             if (adjacent_coord == coords.dst): 
                 valid_attack = True 
         
-        self.action_consequence = "Unit cannot attack: Targeted unit not adjacent!"
+        self.action_consequence = "Unit cannot attack: Targeted unit not adjacent! "
         return valid_attack 
 
     def attack(self, src_unit, dst_unit, coords):
+        print(src_unit.health)
         # combat is bi-directional,  if S attacks T, S damages T but T also damages S
         # meaning that if S attacks T, S does an attack damage to T, but T also does its attack damage to S
         dst_dmg = src_unit.damage_amount(dst_unit)
         src_dmg = dst_unit.damage_amount(src_unit)
 
         if ((dst_unit.health - dst_dmg) > 0): # damage below 0 they are killed, damage_amount return target health when they are killed
-            dst_unit.health = dst_unit.health - dst_dmg
+            dst_unit.health = (dst_unit.health - dst_dmg)
         else: dst_unit.health = 0 # unit died
                 
         if ((src_unit.health - src_dmg) > 0): # damage below 0 they are killed, damage_amount return target health when they are killed
-            src_unit.health = src_unit.health - src_dmg
+            src_unit.health = (src_unit.health - src_dmg)
         else: src_unit.health = 0 # unit died
                 
         self.attack_string(src_unit, dst_unit, coords)
+        print(src_dmg)
+        print(src_unit.health)
 
 #---------------------------------- REPAIR ---------------------------------- #
 
