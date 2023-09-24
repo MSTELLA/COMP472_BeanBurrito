@@ -113,7 +113,6 @@ class MoveHandler:
         return valid_attack 
 
     def attack(self, src_unit, dst_unit, coords):
-        print(src_unit.health)
         # combat is bi-directional,  if S attacks T, S damages T but T also damages S
         # meaning that if S attacks T, S does an attack damage to T, but T also does its attack damage to S
         dst_dmg = src_unit.damage_amount(dst_unit)
@@ -128,8 +127,6 @@ class MoveHandler:
         else: src_unit.health = 0 # unit died
                 
         self.attack_string(src_unit, dst_unit, coords)
-        print(src_dmg)
-        print(src_unit.health)
 
 #---------------------------------- REPAIR ---------------------------------- #
 
