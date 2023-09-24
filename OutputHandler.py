@@ -1,5 +1,3 @@
-import os
-
 class OutputHandler:
     filename = ""
     action_consequence=""
