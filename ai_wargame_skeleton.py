@@ -723,19 +723,14 @@ def main():
 
     #  OutputHandler creates the game file and writes the game parameters
     game.output_handler.setupfile(game.options)
-    
+
     # print title
     title = [
-    "                 .--.  .-.",
-    "                / {} \\ | |",
-    "               /  /\\  \\| |",
-    "               `-'  `-'`-'",
-    "               ",
     " .-. .-.  .--.  .---.  .----.  .--.   .-. .-..---.",
     "| {  } | / {} \\ | {} } |  __/ / {} \\ {  \\/  }| --}",
     "{  /\\  }/  /\\  \\| |\\ \\ | '- }/  /\\  \\| }  { || --}",
     "`-'  `-'`-'  `-'`-' `-'`----'`-'  `-'`-'  `-'`---'",
-    "               ",
+    "",
     "Marie-Josée Castellanos, Gabrielle Guidote, Amrit Sohpal"
     ]
 
