@@ -454,7 +454,9 @@ class Game:
                 return(True,self.move_handler.action_consequence)
             
             #TODO: PERFORM REPAIR
-            # elif action_type==2:
+            elif action_type==2:
+                self.board = self.move_handler.repair(self.board, self.get(coords.src),coords.dst) 
+                return(True,self.move_handler.action_consequence)
             return (True,"") # TODO: RETURN STRING THAT DESCRIBES WHAT HAPPENED
         return (False,"invalid move")
 
