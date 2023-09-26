@@ -781,7 +781,8 @@ def main():
     "{  /\\  }/  /\\  \\| |\\ \\ | '- }/  /\\  \\| }  { || --}",
     "`-'  `-'`-'  `-'`-' `-'`----'`-'  `-'`-'  `-'`---'",
     "",
-    "Marie-Josée Castellanos, Gabrielle Guidote, Amrit Sohpal"
+    "Marie-Josée Castellanos, Gabrielle Guidote, Amrit Sohpal",
+    ""
     ]
 
     for line in title:
