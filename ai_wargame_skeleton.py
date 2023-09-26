@@ -736,13 +736,35 @@ def main():
     # set up game options
     options = Options(game_type=game_type)
 
-    # override class defaults via command line options # TODO
+    # override class defaults via command line options
     if args.max_depth is not None:
         options.max_depth = args.max_depth
     if args.max_time is not None:
         options.max_time = args.max_time
     if args.broker is not None:
         options.broker = args.broker
+
+    # ask user for game parameters
+    print("Please input your game parameters.\n")
+    options.max_turns = int(input("Enter the maximum number of turns: "))
+    options.max_time = int(input("Enter the value of the timeout in seconds: "))
+
+    play_mode = input("Enter the play mode attacker-defender (auto|attacker|defender|manual): ")
+    if play_mode == "attacker":
+        options.game_type = GameType.AttackerVsComp
+    elif play_mode == "defender":
+        options.game_type = GameType.CompVsDefender
+    elif play_mode == "manual":
+        options.game_type = GameType.AttackerVsDefender
+    else:
+        options.game_type = GameType.CompVsComp
+
+    if (game_type != GameType.AttackerVsDefender):
+        alpha_beta = input("Enter whether alpha-beta is on or off (on|off): ")
+        if alpha_beta == 'on': options.alpha_beta = True
+        else: options.alpha_beta = False
+
+        # heuristic = input("Enter the name of your heuristic (e0|e1|e2): ")
 
     # create a new game
     game = Game(options=options)
@@ -752,6 +774,7 @@ def main():
 
     # print title
     title = [
+    "",
     " .-. .-.  .--.  .---.  .----.  .--.   .-. .-..---.",
     "| {  } | / {} \\ | {} } |  __/ / {} \\ {  \\/  }| --}",
     "{  /\\  }/  /\\  \\| |\\ \\ | '- }/  /\\  \\| }  { || --}",
@@ -765,7 +788,6 @@ def main():
 
     # the main game loop
     while True:
-        print()
         print(game)
         winner = game.has_winner()
         if winner is not None:
@@ -773,6 +795,13 @@ def main():
             game.output_handler.write_turn(game)
             game.output_handler.write_end_game(winner.name,game.turns_played) 
             break
+
+        if winner is None and game.turns_played >= game.options.max_turns:
+            print(f"Game has reached the max number of turns with no winner. Defender wins!")
+            game.output_handler.write_turn(game)
+            game.output_handler.write_end_game(Player.Defender.name, game.turns_played) 
+            break
+
         if game.options.game_type == GameType.AttackerVsDefender:
             game.human_turn()
         elif game.options.game_type == GameType.AttackerVsComp and game.next_player == Player.Attacker:
