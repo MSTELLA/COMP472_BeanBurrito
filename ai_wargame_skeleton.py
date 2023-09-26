@@ -235,21 +235,22 @@ class CoordPair:
         y_diff = self.src.col - self.dst.col
         if x_diff > 0 and y_diff==0: 
             self.directionality=0 
-            print("STEPS: directionality registered as UP")
+            # print("STEPS: directionality registered as UP")
         elif x_diff < 0 and y_diff==0: 
             self.directionality=1
-            print("STEPS: directionality registered as DOWN")
+            # print("STEPS: directionality registered as DOWN")
         elif y_diff > 0 and x_diff==0: 
             self.directionality=2
-            print("STEPS: directionality registered as LEFT")
+            # print("STEPS: directionality registered as LEFT")
         elif y_diff < 0 and x_diff==0: 
             self.directionality=3
-            print("STEPS: directionality registered as RIGHT")
+            # print("STEPS: directionality registered as RIGHT")
         elif y_diff==0 and x_diff==0: 
             self.directionality=4
-            print("STEPS: directionality registered as in place")
+            # print("STEPS: directionality registered as in place")
         else:
-            print("STEPS: Not allowed to move in that direction")
+            # print("STEPS: Not allowed to move in that direction")
+            self.directionality=-1
         return self.directionality
 
 
@@ -409,7 +410,7 @@ class Game:
         # DETERMINE TYPE OF ACTION
         self.move_handler.action_type(src_unit,dst_unit,coords) # sets action type
         action_type= self.move_handler.ACTION.value # 0: Movement 1: Attack 2: Repair 3: Self-Destruct
-        print("STEPS: Action determined to be #",action_type)
+        # print("STEPS: Action determined to be #",action_type)
 
         # VALIDATE SELFDESTRUCT
         if action_type==3:
@@ -452,22 +453,22 @@ class Game:
         """Validate and perform a move expressed as a CoordPair."""
         if self.is_valid_move(coords): # validates coordinates source and target, sets action type and validates it
 
-            print("STEPS: Will now perform move")
+            # print("STEPS: Will now perform move")
             action_type= self.move_handler.ACTION.value # 0: Movement 1: Attack 2: Repair 3: Self-Destruct
 
             # PERFORM SELF-DESTRUCT
             if action_type==3:
-                print("SD STEPS: Will now perform SD")
+                # print("SD STEPS: Will now perform SD")
                 self.board=self.move_handler.self_Destruct(self.board,self.get(coords.src),coords.src)
-                print("SD STEPS: Will now clean up board")
+                # print("SD STEPS: Will now clean up board")
                 self.clean_up_board()
                 return(True,self.move_handler.action_consequence)
             
             # PERFORM ATTACK
             if action_type==1:
-                print("Attack STEPS: Will now perform an Attack")
+                # print("Attack STEPS: Will now perform an Attack")
                 self.move_handler.attack(self.get(coords.src), self.get(coords.dst), coords)
-                print("Attack STEPS: Will now clean up board")
+                # print("Attack STEPS: Will now clean up board")
                 self.clean_up_board()
                 return(True,self.move_handler.action_consequence)
                 
@@ -478,7 +479,7 @@ class Game:
             
             #TODO: PERFORM REPAIR
             elif action_type==2:
-                print("REPAIR STEPS: Will now perform Repair")
+                # print("REPAIR STEPS: Will now perform Repair")
                 self.board = self.move_handler.repair(self.board, self.get(coords.src),coords.src,coords.dst)
                 return(True,self.move_handler.action_consequence)
             return (True,"") # TODO: RETURN STRING THAT DESCRIBES WHAT HAPPENED

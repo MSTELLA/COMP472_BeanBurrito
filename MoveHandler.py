@@ -14,12 +14,6 @@ class MoveHandler:
     action_consequence = ""
     coords = None
 
-    # AI = 0
-    # Tech = 1
-    # Virus = 2
-    # Program = 3
-    # Firewall = 4
-
     def action_type(self, src_unit, dst_unit, coords):
         # after validations: Coords are on the board, unit belongs to player, src is not empty
         # if target and source are the same (directionality is 4) => self-destruct 
@@ -136,8 +130,6 @@ class MoveHandler:
 
     # ---------------------------------- REPAIR ---------------------------------- #
 
-    # def repair():
-
     # Method that will be used to generate a string describing the repair (wil be used by output handler)
     def repair_string(self, src_unit, src_coord, dst_coord, repair_value):
         self.action_consequence = "Repair Action Performed." + src_unit.type.name + " Unit at " + src_unit.to_string() + "repaired" + dst_coord.to_string() + "by" + str(repair_value) + "points"
@@ -185,4 +177,4 @@ class MoveHandler:
     def selfdestruct_string(self, src_unit, src_coord, damaged_units, destroyed_units):
         self.action_consequence = "Self-Destruct Action Performed. " + src_unit.type.name + " Unit at " + src_coord.to_string() + " and has damaged " + str(
             len(damaged_units)) + " nearby units and destroyed " + str(len(destroyed_units)) + " nearby units."
-    # TODO: FORMAT THIS STRING
+
