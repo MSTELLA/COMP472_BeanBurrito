@@ -479,7 +479,7 @@ class Game:
             #TODO: PERFORM REPAIR
             elif action_type==2:
                 print("REPAIR STEPS: Will now perform Repair")
-                self.board = self.move_handler.repair(self.board, self.get(coords.src),coords.dst) 
+                self.board = self.move_handler.repair(self.board, self.get(coords.src),coords.src,coords.dst)
                 return(True,self.move_handler.action_consequence)
             return (True,"") # TODO: RETURN STRING THAT DESCRIBES WHAT HAPPENED
         return (False,"invalid move")

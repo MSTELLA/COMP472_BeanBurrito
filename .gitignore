@@ -1,3 +1,6 @@
 
 __pycache__/Types.cpython-311.pyc
 tempCodeRunnerFile.python
+*.xml
+*.iml
+*.txt
