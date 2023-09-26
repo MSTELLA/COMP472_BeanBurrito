@@ -426,7 +426,7 @@ class Game:
         elif action_type==0:
             return self.move_handler.validate_movement(src_unit, coords, self.board)
 
-        # TODO: VALIDATE REPAIR
+        # VALIDATE REPAIR
         elif action_type==2:
             #Verify if targeted unit is enemy or friendly (is None verifies if dst_unit == NULL)
             if dst_unit is None or dst_unit.player != self.next_player:
@@ -472,17 +472,17 @@ class Game:
                 self.clean_up_board()
                 return(True,self.move_handler.action_consequence)
                 
-            #PERFORM MOVEMENT
+            # PERFORM MOVEMENT
             elif action_type==0:
                 self.board=self.move_handler.movement(self.board,self.get(coords.src),coords)
                 return(True,self.move_handler.action_consequence)
             
-            #TODO: PERFORM REPAIR
+            # PERFORM REPAIR
             elif action_type==2:
                 # print("REPAIR STEPS: Will now perform Repair")
                 self.board = self.move_handler.repair(self.board, self.get(coords.src),coords.src,coords.dst)
                 return(True,self.move_handler.action_consequence)
-            return (True,"") # TODO: RETURN STRING THAT DESCRIBES WHAT HAPPENED
+
         return (False,"invalid move")
 
     def next_turn(self):
@@ -816,7 +816,6 @@ def main():
             else:
                 print("Computer doesn't know what to do!!!")
                 exit(1)
-        # TODO: OUTPUT HANDLER writes turn information
 
 ##############################################################################################################
 
