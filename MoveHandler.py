@@ -110,14 +110,12 @@ class MoveHandler:
         dst_dmg = src_unit.damage_amount(dst_unit)
         src_dmg = dst_unit.damage_amount(src_unit)
 
-        if ((
-                dst_unit.health - dst_dmg) > 0):  # damage below 0 they are killed, damage_amount return target health when they are killed
+        if ((dst_unit.health - dst_dmg) > 0):  # damage below 0 they are killed, damage_amount return target health when they are killed
             dst_unit.health = (dst_unit.health - dst_dmg)
         else:
             dst_unit.health = 0  # unit died
 
-        if ((
-                src_unit.health - src_dmg) > 0):  # damage below 0 they are killed, damage_amount return target health when they are killed
+        if ((src_unit.health - src_dmg) > 0):  # damage below 0 they are killed, damage_amount return target health when they are killed
             src_unit.health = (src_unit.health - src_dmg)
         else:
             src_unit.health = 0  # unit died
