@@ -30,10 +30,6 @@ class MoveHandler:
         elif src_unit.player == dst_unit.player:
             self.ACTION = ACTION.Repair
 
-    def clear_move(self):
-        self.ACTION = ACTION.Movement
-        self.action_consequence = ""
-
     # ---------------------------------- MOVEMENT ---------------------------------- #
     def validate_movement(self, src_unit, coords, board) -> bool:
         """ Validates that this unit can perform this movement and isn't restrained by being engaged in combat"""
