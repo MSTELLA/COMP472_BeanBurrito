@@ -385,6 +385,11 @@ class Game:
             target.mod_health(health_delta)
             self.remove_dead(coord)
 
+    def is_adjacent(self, src_coord, dst_coord: Coord) -> bool:
+        """Boolean function that returns T/F based on if target code is
+        in the adjacent list (using iter_adjacent() method )"""
+        return dst_coord in list(src_coord.iter_adjacent())
+
     def is_valid_move(self, coords : CoordPair)-> bool:
         """Validate a move expressed as a CoordPair."""
         if not self.is_valid_coord(coords.src) or not self.is_valid_coord(coords.dst): # If either source or Target are not valid coordinates
@@ -473,6 +478,7 @@ class Game:
             
             #TODO: PERFORM REPAIR
             elif action_type==2:
+                print("REPAIR STEPS: Will now perform Repair")
                 self.board = self.move_handler.repair(self.board, self.get(coords.src),coords.dst) 
                 return(True,self.move_handler.action_consequence)
             return (True,"") # TODO: RETURN STRING THAT DESCRIBES WHAT HAPPENED
