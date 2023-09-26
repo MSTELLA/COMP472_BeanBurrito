@@ -800,10 +800,13 @@ def main():
 
         if game.options.game_type == GameType.AttackerVsDefender:
             game.human_turn()
+            game.output_handler.write_turn(game)
         elif game.options.game_type == GameType.AttackerVsComp and game.next_player == Player.Attacker:
             game.human_turn()
+            game.output_handler.write_turn(game)
         elif game.options.game_type == GameType.CompVsDefender and game.next_player == Player.Defender:
             game.human_turn()
+            game.output_handler.write_turn(game)
         else:
             player = game.next_player
             move = game.computer_turn()
