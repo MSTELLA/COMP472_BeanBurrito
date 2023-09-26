@@ -400,8 +400,11 @@ class Game:
         src_unit = self.get(coords.src) # Get Source unit
         dst_unit = self.get(coords.dst) # Get Destination unit
 
-        if src_unit is None or src_unit.player != self.next_player: # Source coordinate is empty or not the player's unit
-            print("The Source coordinates contain no unit or contain an adversary unit")
+        if src_unit is None:
+            print("The Source coordinates contain no unit.")
+            return False
+        elif src_unit.player != self.next_player: # Source coordinate is empty or not the player's unit
+            print("The Source coordinates contain an unit that belongs to the adversary.")
             return False
 
         # set Directionality of CoordPair
