@@ -613,6 +613,7 @@ class Game:
     def has_winner(self) -> Player | None:
         """Check if the game is over and returns winner"""
         if self.options.max_turns is not None and self.turns_played >= self.options.max_turns:
+            print(f"Game has reached the max number of turns with no winner. \n")
             return Player.Defender
         elif self._attacker_has_ai:
             if self._defender_has_ai:
@@ -794,12 +795,6 @@ def main():
             print(f"{winner.name} wins!")
             game.output_handler.write_turn(game)
             game.output_handler.write_end_game(winner.name,game.turns_played) 
-            break
-
-        if winner is None and game.turns_played >= game.options.max_turns:
-            print(f"Game has reached the max number of turns with no winner. Defender wins!")
-            game.output_handler.write_turn(game)
-            game.output_handler.write_end_game(Player.Defender.name, game.turns_played) 
             break
 
         if game.options.game_type == GameType.AttackerVsDefender:
