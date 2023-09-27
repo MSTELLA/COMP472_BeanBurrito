@@ -137,7 +137,16 @@ class Unit:
         else: # player is Defender
                 if self.valid_move_defender[self.type.value][coords.directionality] ==1:
                     return True
-        return False # if all of above fails...            
+        return False # if all of above fails...
+
+    def is_not_healer(self) -> bool:
+        # enum to find row index value
+        rowIndex = self.type.value
+        row = self.repair_table[rowIndex]  # Replace repair table with appropriate table
+        return all(value == 0 for value in row)
+
+    def unit_name(self) ->str:
+        return self.type.name
 
 
 ##############################################################################################################
@@ -391,6 +400,8 @@ class Game:
         in the adjacent list (using iter_adjacent() method )"""
         return dst_coord in list(src_coord.iter_adjacent())
 
+
+
     def is_valid_move(self, coords : CoordPair)-> bool:
         """Validate a move expressed as a CoordPair."""
         if not self.is_valid_coord(coords.src) or not self.is_valid_coord(coords.dst): # If either source or Target are not valid coordinates
@@ -445,7 +456,10 @@ class Game:
                 return False
             #verify if unit can repair another unit 
             if src_unit.repair_amount(dst_unit) == 0:
-                print("Invalid, the following unit cannot repair another unit!")
+                if src_unit.is_not_healer():
+                    print("Invalid, the following unit cannot repair another unit!")
+                else:
+                    print("Unit " + src_unit.unit_name() + " cannot heal " + dst_unit.unit_name())
                 return False
             return True
         # elif action_type==2:
