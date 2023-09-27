@@ -798,7 +798,7 @@ def main():
         winner = game.has_winner()
         if winner is not None:
             print(f"{winner.name} wins!")
-            game.output_handler.write_turn(game)
+            # game.output_handler.write_turn(game)
             game.output_handler.write_end_game(winner.name,game.turns_played) 
             break
 

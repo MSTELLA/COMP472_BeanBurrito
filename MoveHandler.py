@@ -32,14 +32,15 @@ class MoveHandler:
 
     # ---------------------------------- MOVEMENT ---------------------------------- #
     def validate_movement(self, src_unit, coords, board) -> bool:
-        """ Validates that this unit can perform this movement and isn't restrained by being engaged in combat"""
+        """ Validates that this unit can perform this movement, the coordinates are adjacent and isn't restrained by being engaged in combat"""
         # Validation that this type of unit for this player type can move in this direction
         valid_direction = self.valid_direction(src_unit, coords)
         # Validation that this unit is not engaged in combat
         # Only 0:AI, 3:Program and 4:Firewall cannot move if engaged in combat
         valid_engaged_in_combat = self.valid_engaged_in_combat(src_unit, coords.src, board)
+        valid_adjacent=self.valid_adjacent_movement(coords)
         self.movement_string(src_unit, coords)
-        return (valid_direction and valid_engaged_in_combat)
+        return (valid_direction and valid_engaged_in_combat and valid_adjacent)
 
     def valid_direction(self, src_unit, coords) -> bool:
         valid_direction = src_unit.validate_move_direction(coords)
@@ -59,8 +60,19 @@ class MoveHandler:
                     if coord_content is not None:
                         if coord_content.player.value != src_unit.player.value:
                             valid_engaged_in_combat = False  # TRUE = there is an adversarial unit in the adjacent coordinates
-                            self.action_consequence = "Unit cannot move: Adversarial unit adjacent!"
+                            self.action_consequence = "Unit cannot move: Adversarial unit adjacent, engaged in combat!"
         return valid_engaged_in_combat
+    
+    def valid_adjacent_movement(self,coords) -> bool:
+        valid_adjacent = False
+        for adjacent_coord in coords.src.iter_adjacent():
+            if (adjacent_coord == coords.dst):
+                valid_adjacent = True
+        if valid_adjacent:
+            return valid_adjacent
+        else:
+            self.action_consequence= "Coordinates entered are not adjacent."
+            return valid_adjacent
 
     def movement_string(self, src_unit, coords):
         self.action_consequence = "Movement Action Performed. " + src_unit.type.name + " Unit at " + coords.src.to_string() + " is now at " + coords.dst.to_string()
@@ -157,9 +169,9 @@ class MoveHandler:
             if not (coord.row < 0 or coord.row >= dim or coord.col < 0 or coord.col >= dim):
                 coord_content = board[coord.row][coord.col]
                 if coord_content is not None:
-                    print("SD STEPS: Damaging nearby unit ", coord_content.type.name, " health: ", coord_content.health)
+                    # print("SD STEPS: Damaging nearby unit ", coord_content.type.name, " health: ", coord_content.health)
                     coord_content.mod_health(-2)
-                    print("SD STEPS: Damaged nearby unit ", coord_content.type.name, " health: ", coord_content.health)
+                    # print("SD STEPS: Damaged nearby unit ", coord_content.type.name, " health: ", coord_content.health)
                     if coord_content.health > 0:
                         damaged_units.append(coord_content)
                     else:
