@@ -304,7 +304,7 @@ class Options:
     alpha_beta : bool = True
     max_turns : int | None = 100
     randomize_moves : bool = True
-    broker : str | None = None
+    broker : str | None = None # What is this for?
 
 ##############################################################################################################
 
@@ -614,7 +614,7 @@ class Game:
         """Computer plays a move."""
         mv = self.suggest_move()
         if mv is not None:
-            (success,result) = self.perform_move(mv)
+            (success,result) = self.perform_move(mv) # validates and performs
             if success:
                 print(f"Computer {self.next_player.name}: ",end='')
                 print(result)
@@ -645,7 +645,7 @@ class Game:
         elif self._defender_has_ai:
             return Player.Defender
 
-    def move_candidates(self) -> Iterable[CoordPair]:
+    def move_candidates(self) -> Iterable[CoordPair]: # GENERATES MOVE CANDIDATES OF ONE LEVEL! 
         """Generate valid move candidates for the next player."""
         move = CoordPair()
         for (src,_) in self.player_units(self.next_player):
@@ -659,7 +659,7 @@ class Game:
 
     def random_move(self) -> Tuple[int, CoordPair | None, float]:
         """Returns a random move."""
-        move_candidates = list(self.move_candidates())
+        move_candidates = list(self.move_candidates()) # The list size will help with branching factor?
         random.shuffle(move_candidates)
         if len(move_candidates) > 0:
             return (0, move_candidates[0], 1)
@@ -668,9 +668,11 @@ class Game:
 
     def suggest_move(self) -> CoordPair | None: 
         """Suggest the next move using minimax alpha beta. TODO: REPLACE RANDOM_MOVE WITH PROPER GAME LOGIC!!!"""
-        start_time = datetime.now()
-        (score, move, avg_depth) = self.random_move()
-        elapsed_seconds = (datetime.now() - start_time).total_seconds()
+        start_time = datetime.now() # Start time
+        (score, move, avg_depth) = self.random_move() # TODO CHANGE
+        elapsed_seconds = (datetime.now() - start_time).total_seconds() # End time
+
+        # Below is generating statistics and printing them
         self.stats.total_seconds += elapsed_seconds
         print(f"Heuristic score: {score}")
         print(f"Average recursive depth: {avg_depth:0.1f}")
@@ -684,7 +686,7 @@ class Game:
         print(f"Elapsed time: {elapsed_seconds:0.1f}s")
         return move
 
-    def post_move_to_broker(self, move: CoordPair): # TODO HUH
+    def post_move_to_broker(self, move: CoordPair):
         """Send a move to the game broker."""
         if self.options.broker is None:
             return
@@ -820,20 +822,20 @@ def main():
             game.output_handler.write_end_game(winner.name,game.turns_played) 
             break
 
-        if game.options.game_type == GameType.AttackerVsDefender:
+        if game.options.game_type == GameType.AttackerVsDefender: # manual
             game.human_turn()
             game.output_handler.write_turn(game)
-        elif game.options.game_type == GameType.AttackerVsComp and game.next_player == Player.Attacker:
+        elif game.options.game_type == GameType.AttackerVsComp and game.next_player == Player.Attacker: # Human Attacker Vs AI Defender
             game.human_turn()
             game.output_handler.write_turn(game)
-        elif game.options.game_type == GameType.CompVsDefender and game.next_player == Player.Defender:
+        elif game.options.game_type == GameType.CompVsDefender and game.next_player == Player.Defender: # AI Attacker vs Human Defender
             game.human_turn()
             game.output_handler.write_turn(game)
-        else:
-            player = game.next_player
+        else:     # AI Attacker and AI Defender or simply AI turn
+            player = game.next_player 
             move = game.computer_turn()
             if move is not None:
-                game.post_move_to_broker(move)
+                game.post_move_to_broker(move) # Sends suggested move from computer_turn() to 
             else:
                 print("Computer doesn't know what to do!!!")
                 exit(1)
