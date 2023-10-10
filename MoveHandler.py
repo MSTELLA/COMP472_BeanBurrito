@@ -132,6 +132,11 @@ class MoveHandler:
             src_unit.health = 0  # unit died
 
         self.attack_string(src_unit, dst_unit, coords)
+    
+    def attack_damage_potentional(self, src_unit, dst_unit) -> int:
+        dst_dmg = src_unit.damage_amount(dst_unit)
+        src_dmg = dst_unit.damage_amount(src_unit)
+        return src_dmg
 
     # ---------------------------------- REPAIR ---------------------------------- #
     def validate_repair(self, src_unit, dst_unit, coords) -> bool:
