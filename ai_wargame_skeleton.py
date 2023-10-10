@@ -362,15 +362,17 @@ class Game:
 
     def get(self, coord : Coord) -> Unit | None:
         """Get contents of a board cell of the game at Coord."""
-        if self.is_valid_coord(coord):
-            return self.board[coord.row][coord.col]
-        else:
-            return None
+        # if self.is_valid_coord(coord): 
+        #     return self.board[coord.row][coord.col]
+        # else:
+        #     return None
+        return self.board[coord.row][coord.col]
+
 
     def set(self, coord : Coord, unit : Unit | None):
         """Set contents of a board cell of the game at Coord."""
-        if self.is_valid_coord(coord):
-            self.board[coord.row][coord.col] = unit
+        # if self.is_valid_coord(coord):
+        self.board[coord.row][coord.col] = unit
 
     def clean_up_board(self):
         for i in range(len(self.board)):
@@ -402,11 +404,12 @@ class Game:
 
 
 
-    def is_valid_move(self, coords : CoordPair)-> bool:
+    def is_valid_move(self, coords : CoordPair)-> bool: # TODO: IF AI MAKES AN INVALID MOVE => OTHER PLAYER WINS
         """Validate a move expressed as a CoordPair."""
-        if not self.is_valid_coord(coords.src) or not self.is_valid_coord(coords.dst): # If either source or Target are not valid coordinates
-            print("The source or destination coordinates are not on the board.")
-            return False
+        # ALREADY CHECKED DURING INPUT: If either source or Target are not valid coordinates
+        #if not self.is_valid_coord(coords.src) or not self.is_valid_coord(coords.dst): 
+        # print("The source or destination coordinates are not on the board.")
+        # return False
 
         src_unit = self.get(coords.src) # Get Source unit
         dst_unit = self.get(coords.dst) # Get Destination unit
@@ -513,6 +516,7 @@ class Game:
         output = ""
         output += f"Next player: {self.next_player.name}\n"
         output += f"Turns played: {self.turns_played}\n"
+        # TODO : ADD AI STATS
         coord = Coord()
         output += "\n   "
         for col in range(dim):
@@ -575,7 +579,7 @@ class Game:
         while True:
             s = input(F'Player {self.next_player.name}, enter your move: ')
             coords = CoordPair.from_string(s)
-            if coords is not None and self.is_valid_coord(coords.src) and self.is_valid_coord(coords.dst):
+            if coords is not None and self.is_valid_coord(coords.src) and self.is_valid_coord(coords.dst): # Check for validate coordinates
                 return coords
             else:
                 print('Invalid coordinates! Try again.')
@@ -606,7 +610,7 @@ class Game:
                 else:
                     print("The move is not valid! Try again.")
 
-    def computer_turn(self) -> CoordPair | None:
+    def computer_turn(self) -> CoordPair | None: # TODO TO INSPECT
         """Computer plays a move."""
         mv = self.suggest_move()
         if mv is not None:
@@ -662,7 +666,7 @@ class Game:
         else:
             return (0, None, 0)
 
-    def suggest_move(self) -> CoordPair | None:
+    def suggest_move(self) -> CoordPair | None: 
         """Suggest the next move using minimax alpha beta. TODO: REPLACE RANDOM_MOVE WITH PROPER GAME LOGIC!!!"""
         start_time = datetime.now()
         (score, move, avg_depth) = self.random_move()
@@ -680,7 +684,7 @@ class Game:
         print(f"Elapsed time: {elapsed_seconds:0.1f}s")
         return move
 
-    def post_move_to_broker(self, move: CoordPair):
+    def post_move_to_broker(self, move: CoordPair): # TODO HUH
         """Send a move to the game broker."""
         if self.options.broker is None:
             return
@@ -699,7 +703,7 @@ class Game:
         except Exception as error:
             print(f"Broker error: {error}")
 
-    def get_move_from_broker(self) -> CoordPair | None:
+    def get_move_from_broker(self) -> CoordPair | None: # TODO
         """Get a move from the game broker."""
         if self.options.broker is None:
             return None
@@ -783,7 +787,7 @@ def main():
         if alpha_beta == 'on': options.alpha_beta = True
         else: options.alpha_beta = False
 
-        # heuristic = input("Enter the name of your heuristic (e0|e1|e2): ")
+    # heuristic = input("Enter the name of your heuristic (e0|e1|e2): ")
 
     # create a new game
     game = Game(options=options)
