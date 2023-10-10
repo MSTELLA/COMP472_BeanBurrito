@@ -104,7 +104,6 @@ class MoveHandler:
         self.action_consequence = "Attack Action Performed. " + action + damage
 
     def validate_attack(self, src_unit, dst_unit, coords) -> bool:
-        self.ACTION = ACTION(1)
         src_unit.validate_move_direction(coords)
         # first check that the src_unit and dst_unit are adjacent
         # units are on adjacent teams
@@ -135,6 +134,28 @@ class MoveHandler:
         self.attack_string(src_unit, dst_unit, coords)
 
     # ---------------------------------- REPAIR ---------------------------------- #
+    def validate_repair(self, src_unit, dst_unit, coords) -> bool:
+        #Verify if targeted unit is enemy or friendly (is None verifies if dst_unit == NULL)
+        if dst_unit is None or dst_unit.player != self.next_player:
+            print("Invalid repair, area selected does not contain an ally unit")
+            return False
+        #Verify if targeted unit is already at full health  
+        if dst_unit.health >= 9:
+            print("Invalid move, Unit is at full health. \n")
+            return False 
+        #verify if targeted unit is adjacent or not to our repair unit
+        if not self.is_adjacent(coords.src, coords.dst):
+            print("Illegal repair move, Targeted unit needs to be adjacent to healing unit")
+            return False
+        #verify if unit can repair another unit 
+        if src_unit.repair_amount(dst_unit) == 0:
+            if src_unit.is_not_healer():
+                print("Invalid, the following unit cannot repair another unit!")
+            else:
+                print("Unit " + src_unit.unit_name() + " cannot heal " + dst_unit.unit_name())
+            return False
+        
+        return True
 
     # Method that will be used to generate a string describing the repair (wil be used by output handler)
     def repair_string(self, src_unit, src_coord, dst_coord, repair_value):

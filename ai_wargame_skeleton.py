@@ -402,8 +402,6 @@ class Game:
         in the adjacent list (using iter_adjacent() method )"""
         return dst_coord in list(src_coord.iter_adjacent())
 
-
-
     def is_valid_move(self, coords : CoordPair)-> bool: # TODO: IF AI MAKES AN INVALID MOVE => OTHER PLAYER WINS
         """Validate a move expressed as a CoordPair."""
         # ALREADY CHECKED DURING INPUT: If either source or Target are not valid coordinates
@@ -445,27 +443,8 @@ class Game:
 
         # VALIDATE REPAIR
         elif action_type==2:
-            #Verify if targeted unit is enemy or friendly (is None verifies if dst_unit == NULL)
-            if dst_unit is None or dst_unit.player != self.next_player:
-                print("Invalid repair, area selected does not contain an ally unit")
-                return False
-            #Verify if targeted unit is already at full health  
-            if dst_unit.health >= 9:
-                print("Invalid move, Unit is at full health. \n")
-                return False 
-            #verify if targeted unit is adjacent or not to our repair unit
-            if not self.is_adjacent(coords.src, coords.dst):
-                print("Illegal repair move, Targeted unit needs to be adjacent to healing unit")
-                return False
-            #verify if unit can repair another unit 
-            if src_unit.repair_amount(dst_unit) == 0:
-                if src_unit.is_not_healer():
-                    print("Invalid, the following unit cannot repair another unit!")
-                else:
-                    print("Unit " + src_unit.unit_name() + " cannot heal " + dst_unit.unit_name())
-                return False
-            return True
-        # elif action_type==2:
+            return self.move_handler.validate_repair(src_unit, dst_unit, coords)
+        
         else:
             return False
 
@@ -475,14 +454,6 @@ class Game:
 
             # print("STEPS: Will now perform move")
             action_type= self.move_handler.ACTION.value # 0: Movement 1: Attack 2: Repair 3: Self-Destruct
-
-            # PERFORM SELF-DESTRUCT
-            if action_type==3:
-                # print("SD STEPS: Will now perform SD")
-                self.board=self.move_handler.self_Destruct(self.board,self.get(coords.src),coords.src)
-                # print("SD STEPS: Will now clean up board")
-                self.clean_up_board()
-                return(True,self.move_handler.action_consequence)
             
             # PERFORM ATTACK
             if action_type==1:
@@ -501,6 +472,14 @@ class Game:
             elif action_type==2:
                 # print("REPAIR STEPS: Will now perform Repair")
                 self.board = self.move_handler.repair(self.board, self.get(coords.src),coords.src,coords.dst)
+                return(True,self.move_handler.action_consequence)
+            
+            # PERFORM SELF-DESTRUCT
+            elif action_type==3:
+                # print("SD STEPS: Will now perform SD")
+                self.board=self.move_handler.self_Destruct(self.board,self.get(coords.src),coords.src)
+                # print("SD STEPS: Will now clean up board")
+                self.clean_up_board()
                 return(True,self.move_handler.action_consequence)
 
         return (False,"invalid move")
@@ -734,6 +713,23 @@ class Game:
         except Exception as error:
             print(f"Broker error: {error}")
         return None
+     
+    def player_ai_health(self, player: Player) -> int:
+        """Returns health of players AI unit."""
+        for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
+            unit = self.get(coord)
+            if unit is not None and unit.player == player and unit.type == UnitType.AI:
+                return unit.health
+    
+    def move_damage_potential(self, coords : CoordPair) -> int:
+        if self.is_valid_move(coords):
+            action_type = self.move_handler.ACTION.value
+            if (action_type == 1 or  action_type == 3):
+                # only attack and self_destruct results in damage
+
+            else: return 0
+
+
 
 ##############################################################################################################
 
