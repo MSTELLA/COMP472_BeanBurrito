@@ -4,13 +4,13 @@ from bigtree import Node, print_tree
 class GameTree:
     time_info=None
 
-    def __init__(self, current_game, heuristic, max_search_depth = 1):
+    def __init__(self, current_game, heuristic, max_search_depth = 5):
         self.root = Node("current_game", game=current_game)
         self.max_search_depth = max_search_depth
 
     def expand_tree_max_levels(self):
         limit = self.max_search_depth
-        while (limit >= 0):
+        while (limit > 0):
             self.expand_tree_1_level()
             # keep track of stats TODO
             limit = limit - 1
@@ -21,11 +21,7 @@ class GameTree:
             self.expand_one_node(leaf)
     
     def expand_one_node(self, parent_node):
-        # CHECK IF GAME IS NOT OVER
-        if parent_node.game.has_winner():
-            return None
-
-        # CHECK IF max_turns
+        # CHECK IF GAME IS NOT OVER (also checks max turns)
         if parent_node.game.has_winner():
             return None
 
