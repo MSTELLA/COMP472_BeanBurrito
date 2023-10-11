@@ -721,6 +721,7 @@ class Game:
             if unit is not None and unit.player == player and unit.type == UnitType.AI:
                 return unit.health
     
+    '''
     def move_damage_potential(self, coords : CoordPair) -> int:
         if self.is_valid_move(coords):
             action_type = self.move_handler.ACTION.value
@@ -728,6 +729,7 @@ class Game:
                 # only attack and self_destruct results in damage
 
             else: return 0
+    '''
 
 
 
