@@ -1,4 +1,5 @@
 # AI handler with minimax alphabeta e0 e1 e2
+from GameTree import GameTree
 
 class Minimax_Handler:
     heuristic = ""

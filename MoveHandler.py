@@ -141,24 +141,24 @@ class MoveHandler:
     # ---------------------------------- REPAIR ---------------------------------- #
     def validate_repair(self, src_unit, dst_unit, coords) -> bool:
         self.ACTION = ACTION(2)
-        #Verify if targeted unit is enemy or friendly (is None verifies if dst_unit == NULL)
-        if dst_unit is None or dst_unit.player != self.next_player:
-            print("Invalid repair, area selected does not contain an ally unit")
-            return False
+        #Verify if targeted unit is enemy or friendly (is None verifies if dst_unit == NULL) = > already done with ActionType Dispatcher
+        # if dst_unit is None or dst_unit.player != self.next_player:
+        #     print("Invalid repair, area selected does not contain an ally unit")
+        #     return False
         #Verify if targeted unit is already at full health  
         if dst_unit.health >= 9:
-            print("Invalid move, Unit is at full health. \n")
+            self.action_consequence ="Invalid move, Unit is at full health. \n"
             return False 
         #verify if targeted unit is adjacent or not to our repair unit
-        if not self.is_adjacent(coords.src, coords.dst):
-            print("Illegal repair move, Targeted unit needs to be adjacent to healing unit")
+        if not self.valid_adjacent_movement(coords):
+            self.action_consequence ="Illegal repair move, Targeted unit needs to be adjacent to healing unit"
             return False
         #verify if unit can repair another unit 
         if src_unit.repair_amount(dst_unit) == 0:
             if src_unit.is_not_healer():
-                print("Invalid, the following unit cannot repair another unit!")
+                self.action_consequence ="Invalid, the following unit cannot repair another unit!"
             else:
-                print("Unit " + src_unit.unit_name() + " cannot heal " + dst_unit.unit_name())
+                self.action_consequence ="Unit " + src_unit.unit_name() + " cannot heal " + dst_unit.unit_name()
             return False
         
         return True

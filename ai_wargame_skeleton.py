@@ -10,6 +10,8 @@ import random
 import requests
 from MoveHandler import MoveHandler
 from OutputHandler import OutputHandler
+from GameTree import GameTree
+from bigtree import Node, print_tree
 
 # maximum and minimum values for our heuristic scores (usually represents an end of game condition)
 MAX_HEURISTIC_SCORE = 2000000000
@@ -362,17 +364,17 @@ class Game:
 
     def get(self, coord : Coord) -> Unit | None:
         """Get contents of a board cell of the game at Coord."""
-        # if self.is_valid_coord(coord): 
-        #     return self.board[coord.row][coord.col]
-        # else:
-        #     return None
+        if self.is_valid_coord(coord): 
+            return self.board[coord.row][coord.col]
+        else:
+            return None
         return self.board[coord.row][coord.col]
 
 
     def set(self, coord : Coord, unit : Unit | None):
         """Set contents of a board cell of the game at Coord."""
-        # if self.is_valid_coord(coord):
-        self.board[coord.row][coord.col] = unit
+        if self.is_valid_coord(coord):
+            self.board[coord.row][coord.col] = unit
 
     def clean_up_board(self):
         for i in range(len(self.board)):
@@ -404,10 +406,9 @@ class Game:
 
     def is_valid_move(self, coords : CoordPair)-> bool: # TODO: IF AI MAKES AN INVALID MOVE => OTHER PLAYER WINS
         """Validate a move expressed as a CoordPair."""
-        # ALREADY CHECKED DURING INPUT: If either source or Target are not valid coordinates
-        #if not self.is_valid_coord(coords.src) or not self.is_valid_coord(coords.dst): 
-        # print("The source or destination coordinates are not on the board.")
-        # return False
+        if not self.is_valid_coord(coords.src) or not self.is_valid_coord(coords.dst): 
+            print("The source or destination coordinates are not on the board.")
+            return False
 
         src_unit = self.get(coords.src) # Get Source unit
         dst_unit = self.get(coords.dst) # Get Destination unit
@@ -481,7 +482,39 @@ class Game:
                 # print("SD STEPS: Will now clean up board")
                 self.clean_up_board()
                 return(True,self.move_handler.action_consequence)
+        return (False,"invalid move")
 
+        def perform_move_minimax(self, coords : CoordPair) -> Tuple[bool,str]: #returns (success,result)
+            """ performs the pre-validated move on a new node in the search tree"""
+            # print("STEPS: Will now perform move")
+            action_type= self.move_handler.ACTION.value # 0: Movement 1: Attack 2: Repair 3: Self-Destruct
+
+            # PERFORM ATTACK
+            if action_type==1:
+                # print("Attack STEPS: Will now perform an Attack")
+                self.move_handler.attack(self.get(coords.src), self.get(coords.dst), coords)
+                # print("Attack STEPS: Will now clean up board")
+                self.clean_up_board()
+                return(True,self.move_handler.action_consequence)
+    
+            # PERFORM MOVEMENT
+            elif action_type==0:
+                self.board=self.move_handler.movement(self.board,self.get(coords.src),coords)
+                return(True,self.move_handler.action_consequence)
+            
+            # PERFORM REPAIR
+            elif action_type==2:
+                # print("REPAIR STEPS: Will now perform Repair")
+                self.board = self.move_handler.repair(self.board, self.get(coords.src),coords.src,coords.dst)
+                return(True,self.move_handler.action_consequence)
+            
+            # PERFORM SELF-DESTRUCT
+            elif action_type==3:
+                # print("SD STEPS: Will now perform SD")
+                self.board=self.move_handler.self_Destruct(self.board,self.get(coords.src),coords.src)
+                # print("SD STEPS: Will now clean up board")
+                self.clean_up_board()
+                return(True,self.move_handler.action_consequence)
         return (False,"invalid move")
 
     def next_turn(self):
@@ -624,7 +657,7 @@ class Game:
         elif self._defender_has_ai:
             return Player.Defender
 
-    def move_candidates(self) -> Iterable[CoordPair]: # GENERATES MOVE CANDIDATES OF ONE LEVEL! 
+    def move_candidates(self) -> Iterable[CoordPair]: # GENERATES MOVE CANDIDATES OF ONE NODE over all this player's unit
         """Generate valid move candidates for the next player."""
         move = CoordPair()
         for (src,_) in self.player_units(self.next_player):
@@ -649,6 +682,12 @@ class Game:
         """Suggest the next move using minimax alpha beta. TODO: REPLACE RANDOM_MOVE WITH PROPER GAME LOGIC!!!"""
         start_time = datetime.now() # Start time
         (score, move, avg_depth) = self.random_move() # TODO CHANGE
+
+        # TESTING TREE
+        gametree_test = GameTree(self,0,1)
+        gametree_test.expand_tree_max_levels()
+        print_tree(gametree_test.root)
+
         elapsed_seconds = (datetime.now() - start_time).total_seconds() # End time
 
         # Below is generating statistics and printing them

@@ -4,3 +4,6 @@ tempCodeRunnerFile.python
 *.xml
 *.iml
 *.txt
+__pycache__/MoveHandler.cpython-311.pyc
+__pycache__/OutputHandler.cpython-311.pyc
+__pycache__/GameTree.cpython-311.pyc
