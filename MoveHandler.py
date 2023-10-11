@@ -104,7 +104,7 @@ class MoveHandler:
         self.action_consequence = "Attack Action Performed. " + action + damage
 
     def validate_attack(self, src_unit, dst_unit, coords) -> bool:
-        src_unit.validate_move_direction(coords)
+        self.ACTION = ACTION(1)
         # first check that the src_unit and dst_unit are adjacent
         # units are on adjacent teams
         valid_attack = False
@@ -140,6 +140,7 @@ class MoveHandler:
 
     # ---------------------------------- REPAIR ---------------------------------- #
     def validate_repair(self, src_unit, dst_unit, coords) -> bool:
+        self.ACTION = ACTION(2)
         #Verify if targeted unit is enemy or friendly (is None verifies if dst_unit == NULL)
         if dst_unit is None or dst_unit.player != self.next_player:
             print("Invalid repair, area selected does not contain an ally unit")
