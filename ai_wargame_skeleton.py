@@ -357,6 +357,13 @@ class Game:
         new = copy.copy(self)
         new.board = copy.deepcopy(self.board)
         return new
+    
+    def complete_clone(self) -> Game:
+        """Make a new copy of a game for minimax recursion.
+        Deep copy of everything except the board (options and stats are shared).
+        """
+        new = copy.deepcopy(self)
+        return new
 
     def is_empty(self, coord : Coord) -> bool:
         """Check if contents of a board cell of the game at Coord is empty (must be valid coord)."""
@@ -484,38 +491,75 @@ class Game:
                 return(True,self.move_handler.action_consequence)
         return (False,"invalid move")
 
-        def perform_move_minimax(self, coords : CoordPair) -> Tuple[bool,str]: #returns (success,result)
-            """ performs the pre-validated move on a new node in the search tree"""
+    def perform_move_on_board_only(self, coords : CoordPair) -> Tuple[bool,str]: #returns (success,board_state)
+        """Validate and perform a move expressed as a CoordPair."""
+        board = self.board
+        if self.is_valid_move(coords): # validates coordinates source and target, sets action type and validates it
+
             # print("STEPS: Will now perform move")
             action_type= self.move_handler.ACTION.value # 0: Movement 1: Attack 2: Repair 3: Self-Destruct
-
+            
             # PERFORM ATTACK
             if action_type==1:
-                # print("Attack STEPS: Will now perform an Attack")
-                self.move_handler.attack(self.get(coords.src), self.get(coords.dst), coords)
-                # print("Attack STEPS: Will now clean up board")
+                # combat is bi-directional,  if S attacks T, S damages T but T also damages S
+                # meaning that if S attacks T, S does an attack damage to T, but T also does its attack damage to S
+                src_unit = self.get(coords.src)
+                dst_unit = self.get(coords.dst)
+                dst_dmg = src_unit.damage_amount(dst_unit)
+                src_dmg = dst_unit.damage_amount(src_unit)
+                if ((dst_unit.health - dst_dmg) > 0):  # damage below 0 they are killed, damage_amount return target health when they are killed
+                    dst_unit.health = (dst_unit.health - dst_dmg)
+                else:
+                    dst_unit.health = 0  # unit died
+
+                if ((src_unit.health - src_dmg) > 0):  # damage below 0 they are killed, damage_amount return target health when they are killed
+                    src_unit.health = (src_unit.health - src_dmg)
+                else:
+                    src_unit.health = 0  # unit died
                 self.clean_up_board()
-                return(True,self.move_handler.action_consequence)
-    
-            # PERFORM MOVEMENT
+                return(True)
+                
+            # PERFORM MOVEMENT ON BOARD ONLY
             elif action_type==0:
-                self.board=self.move_handler.movement(self.board,self.get(coords.src),coords)
-                return(True,self.move_handler.action_consequence)
+                board[coords.dst.row][coords.dst.col] = self.get(coords.src)
+                board[coords.src.row][coords.src.col] = None
+                return(True)
             
             # PERFORM REPAIR
             elif action_type==2:
-                # print("REPAIR STEPS: Will now perform Repair")
-                self.board = self.move_handler.repair(self.board, self.get(coords.src),coords.src,coords.dst)
-                return(True,self.move_handler.action_consequence)
+                src_unit = self.get(coords.src)
+                src_coordinates = coords.src
+                dst_coordinates = coords.dst
+                # Setting the target goal
+                dstUnit = board[dst_coordinates.row][dst_coordinates.col]
+                # Using accessor repair_amount to calculate the total repair
+                repairVal = src_unit.repair_amount(dstUnit)  # repair_amount gets value from table provided
+                # Using mutator method mod_health to modify unit's health
+                dstUnit.mod_health(repairVal)
+                self.repair_string(src_unit, src_coordinates, dst_coordinates, repairVal)
+                return(True)
             
             # PERFORM SELF-DESTRUCT
             elif action_type==3:
-                # print("SD STEPS: Will now perform SD")
-                self.board=self.move_handler.self_Destruct(self.board,self.get(coords.src),coords.src)
-                # print("SD STEPS: Will now clean up board")
+                src_unit = self.get(coords.src)
+                src_coord = coords.src
+                dim = len(board)
+                damaged_units = []
+                destroyed_units = []
+                for coord in src_coord.iter_range(1):
+                    if not (coord.row < 0 or coord.row >= dim or coord.col < 0 or coord.col >= dim):
+                        coord_content = board[coord.row][coord.col]
+                        if coord_content is not None:
+                            coord_content.mod_health(-2)
+                            if coord_content.health > 0:
+                                damaged_units.append(coord_content)
+                            else:
+                                destroyed_units.append(coord_content)
+                board[src_coord.row][src_coord.col].health = 0  # src unit now has 0 health
                 self.clean_up_board()
-                return(True,self.move_handler.action_consequence)
-        return (False,"invalid move")
+                return(True)
+        return (False,None)
+
 
     def next_turn(self):
         """Transitions game to the next turn."""
@@ -684,9 +728,9 @@ class Game:
         (score, move, avg_depth) = self.random_move() # TODO CHANGE
 
         # TESTING TREE
-        gametree_test = GameTree(self,0,1)
+        gametree_test = GameTree(self.clone(),0)
         gametree_test.expand_tree_max_levels()
-        print_tree(gametree_test.root)
+        print_tree(gametree_test.root,attr_list=["move"])
 
         elapsed_seconds = (datetime.now() - start_time).total_seconds() # End time
 
