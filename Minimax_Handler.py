@@ -17,9 +17,6 @@ class Minimax_Handler:
         unit_weights = [9999, 3, 3, 3, 3] # AI, Tech, Virus, Program, Firewall
 
         # P1 sum  - P2 sum, defender is P1 and attacker is P2 , therefore defender is minimizing and attacker is maximizing
-        p1_units = list(game.player_units(defender))
-        p2_units = list(game.player_units(attacker))
-
         unit_count_p1, unit_count_p2 = [0, 0 , 0 , 0, 0] # AI, Tech, Virus, Program, Firewall
         # get the number of units for each player
         for p1_unit in game.player_units(defender):
