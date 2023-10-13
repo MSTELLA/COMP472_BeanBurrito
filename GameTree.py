@@ -41,11 +41,14 @@ class GameTree:
             newgame.perform_move_on_board_only(child_CoordPair)
             # print("PERFORMED MOVE TEST, SEE RESULT:\n")
             # print(newgame.board_print())
+
+            minimax =  "MAX" if newgame.next_player.value == 0 else "MIN"
+
             newgame.next_turn()
 
             #Create a new Node
             id = "node_level(" + str(parent_node.depth) + ")-childnode(" + str(i) + ")" # Node id : child level, parent name (level and child of parent) child number of parent
-            new_node_child = Node(id, parent = parent_node, game = newgame, move=child_CoordPair)
+            new_node_child = Node(id, parent = parent_node, game = newgame, move=child_CoordPair, minimax=minimax)
             # print("TESTING TREE: created node: ", id)
             i+=1
             children.append(new_node_child)

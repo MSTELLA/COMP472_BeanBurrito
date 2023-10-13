@@ -358,12 +358,12 @@ class Game:
         new.board = copy.deepcopy(self.board)
         return new
     
-    def complete_clone(self) -> Game:
-        """Make a new copy of a game for minimax recursion.
-        Deep copy of everything except the board (options and stats are shared).
-        """
-        new = copy.deepcopy(self)
-        return new
+    # def complete_clone(self) -> Game:
+    #     """Make a new copy of a game for minimax recursion.
+    #     Deep copy of everything except the board (options and stats are shared).
+    #     """
+    #     new = copy.deepcopy(self)
+    #     return new
 
     def is_empty(self, coord : Coord) -> bool:
         """Check if contents of a board cell of the game at Coord is empty (must be valid coord)."""
@@ -730,7 +730,7 @@ class Game:
         # TESTING TREE
         gametree_test = GameTree(self.clone(),0)
         gametree_test.expand_tree_max_levels()
-        print_tree(gametree_test.root,attr_list=["move"])
+        print_tree(gametree_test.root,attr_list=["move", "minimax"])
 
         elapsed_seconds = (datetime.now() - start_time).total_seconds() # End time
 
