@@ -8,8 +8,10 @@ from time import sleep
 from typing import Tuple, TypeVar, Type, Iterable, ClassVar
 import random
 import requests
+import math
 from MoveHandler import MoveHandler
 from OutputHandler import OutputHandler
+from Minimax_Handler import MinimaxHandler
 from GameTree import GameTree
 from bigtree import Node, print_tree
 
@@ -126,7 +128,7 @@ class Unit:
             return 9 - target.health
         return amount
 
-    def validate_move_direction(self,coords:CoordPair) -> boolean:
+    def validate_move_direction(self,coords:CoordPair) -> bool:
         """Validate specific allowed moves for the player type and unit type (must receive already validated coordinates)"""
         directionality = coords.directionality #sets directionality of CoordPair and returns it
         if directionality==4: # If the source and destination are the same (self-destruct)
@@ -796,6 +798,18 @@ class Game:
         except Exception as error:
             print(f"Broker error: {error}")
         return None
+    
+    # heuristic
+    def locate_unit_on_board(self, player: Player, unit_type_as_string: str) -> Iterable[Coord]:
+        """Iterates over all units belonging to a player and returns unit coords of unit_type"""
+        for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
+            unit = self.get(coord)
+            if unit is not None and unit.player == player and unit.unit_name == unit_type_as_string:
+                yield coord
+    
+    def calculate_distance_units(self, unit1_coord : Coord, unit2_coord : Coord) -> int:
+        """Uses the euclidean distance to calculate the distance between 2 units"""
+        return math.sqrt((unit1_coord.row - unit2_coord.row) ** 2 + (unit1_coord.col - unit2_coord.col) ** 2)
      
     def player_ai_health(self, player: Player) -> int:
         """Returns health of players AI unit."""
@@ -803,7 +817,7 @@ class Game:
             unit = self.get(coord)
             if unit is not None and unit.player == player and unit.type == UnitType.AI:
                 return unit.health
-    
+
     '''
     def move_damage_potential(self, coords : CoordPair) -> int:
         if self.is_valid_move(coords):
