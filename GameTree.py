@@ -56,5 +56,8 @@ class GameTree:
         # Add these new nodes to the parent
         parent_node.children=children
 
+        #Verifies if game has a winner (terminal node)
+        def is_terminal(self, node):
+            return node.game.has_winner()
     
             

@@ -100,3 +100,54 @@ class MinimaxHandler:
 
         # TODO : maybe we can add weights to these ?
         return ai_health_dif + distance_to_defender_ai + inverse_damage_potential + number_units_engaged_in_combat
+
+    # TODO implement a if else statement that calculates heuristic depending on heuristic chosen by user.
+    def calculate_heuristic(self,node,heuristic):
+        if heuristic == 'e0':
+            return self.e0(node.game, node.Player.Defender, node.Player.Attacker) # NOT SURE IF RIGHT WAY TO IMPLEMENT
+        if heuristic == 'e1':
+            return self.e1(node.game, node.Player.Defender, node.Player.Attacker)  # NOT SURE IF RIGHT WAY TO IMPLEMENT
+        if heuristic == 'e2':
+            return self.e2(node.game, node.Player.Defender, node.Player.Attacker)  # NOT SURE IF RIGHT WAY TO IMPLEMENT
+
+    # method minimax with alphabeta
+    def minimax(self,node,depth,maximizing_player,alpha_beta = False, alpha=-float('inf'), beta=float('inf')):
+
+        if depth == 0 or node.is_terminal():
+            return self.calculate_heuristic(node)
+
+        # Defender player logic
+        if maximizing_player: #NEED TO CHANGE IF PLAYER == Defender
+            maxEval = -float('inf')
+            for child in node.children:
+                # we are recursively calling the minimax player where the maximizing player is now false
+                #At this depth is the minimizing players turn (Attackers)
+                currentEval = self.minimax(child, depth - 1, False, alpha_beta, alpha, beta) #TODO somehow set player defender max and attacker min
+                maxEval = max(maxEval, currentEval) # will replace max eval if currentEval > maxEval
+
+                # if we turn on alpha beta pruning:
+                if alpha_beta:
+                    alpha = max(alpha, currentEval)
+                    # If beta is greater than or equal to alpha, prune the rest of the branches!
+                    if beta <= alpha:
+                        break
+
+            return maxEval
+
+        # Attacker Player Logic
+        else:
+            minEval = float('inf')
+            for child in node.children:
+                # we are recursively calling the minimax player where the maximizing player is now True
+                # At this depth is the minimizing players turn (Defenders)
+                currentEval = self.minimax(child,depth-1,True, alpha_beta, alpha, beta)
+                minEval = min(minEval, currentEval)
+
+                # if alpha beta is turned on
+                if alpha_beta:
+                    beta = min(beta,currentEval)
+                    #For min if alpha is greater than or equal to beta, PRUNEEE!
+                    if beta <= alpha:
+                        break
+
+            return minEval
