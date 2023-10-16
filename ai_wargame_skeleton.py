@@ -798,12 +798,12 @@ class Game:
         return None
     
     # heuristic
-    def locate_unit_on_board(self, player: Player, unit_type_as_string: str) -> Iterable[Coord]:
+    def locate_unit_ai_board(self, player: Player) -> Coord:
         """Iterates over all units belonging to a player and returns unit coords of unit_type"""
         for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
             unit = self.get(coord)
-            if unit is not None and unit.player == player and unit.unit_name == unit_type_as_string:
-                yield coord
+            if unit is not None and unit.player == player and unit.type == UnitType.AI:
+                return coord
     
     def calculate_distance_units(self, unit1_coord : Coord, unit2_coord : Coord) -> int:
         """Uses the euclidean distance to calculate the distance between 2 units"""
