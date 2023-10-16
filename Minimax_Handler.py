@@ -12,6 +12,10 @@ class MinimaxHandler:
     #method minimax with alphabeta
 
     #heuristic e0
+    '''
+    - e0 = (3VP1 + 3TP1 + 3FP1 + 3PP1 + 9999AIP1) - (3VP2 + 3TP2 + 3FP2 + 3PP2 + 9999AIP2) where:
+        VPi =nbofVirusofPlayeri TPi =nbofTechofPlayeri FPi =nbofFirewallofPlayeri PPi =nbofProgramofPlayeri AIPi =nbofAIofPlayeri
+    '''
     def e0(self, game, defender, attacker) -> int:
         self.game = game
         unit_weights = [9999, 3, 3, 3, 3] # AI, Tech, Virus, Program, Firewall
@@ -35,7 +39,7 @@ class MinimaxHandler:
     #heuristic e1
     '''
     - AI health difference (attacker wants to minimize defender AI health) (defender wants to maximize defender AI health)
-       '''
+    '''
     def e1(self, game, defender, attacker) -> int:
         # defender is trying to maximize this number, and attacker is trying to minimize this number 
         return game.player_ai_health(defender) - game.player_ai_health(attacker)
