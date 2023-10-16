@@ -1,3 +1,11 @@
+'''
+COMP 472
+Bean Burrito
+
+Gabrielle Guidote 40175182
+Marie-Jose Castellanos 40168044
+Amrit Sohpal 40176197
+'''
 from __future__ import annotations
 import argparse
 import copy
