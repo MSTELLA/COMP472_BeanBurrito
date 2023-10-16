@@ -107,19 +107,17 @@ class MinimaxHandler:
         return ai_health_dif + distance_to_defender_ai + inverse_damage_potential + number_units_engaged_in_combat
 
     # TODO implement a if else statement that calculates heuristic depending on heuristic chosen by user.
-    def calculate_heuristic(self, node, heuristic):
-        if heuristic == 'e0':
-            return self.e0(node.game, node.Player.Defender, node.Player.Attacker)  # NOT SURE IF RIGHT WAY TO IMPLEMENT
-        if heuristic == 'e1':
-            return self.e1(node.game, node.Player.Defender, node.Player.Attacker)  # NOT SURE IF RIGHT WAY TO IMPLEMENT
-        if heuristic == 'e2':
-            return self.e2(node.game, node.Player.Defender, node.Player.Attacker)  # NOT SURE IF RIGHT WAY TO IMPLEMENT
+    def calculate_heuristic(self, node):
+        self.game = node.game
+        return self.e0(node.game, self.game.next_player, self.game.next_player)  # NOT SURE IF RIGHT WAY TO IMPLEMENT
+
 
     # method minimax with alphabeta
     def minimax(self, node, depth, maximizing_player, alpha_beta=False, alpha=-float('inf'), beta=float('inf')):
 
-        if depth == 0 or node.game_tree.is_terminal():
-            return self.calculate_heuristic(node)
+        # if depth == 0 or node.is_terminal():
+        if depth == 0: #TODO fix node.is_terminal()!!!!!!
+            return self.calculate_heuristic(node), None
 
         # Defender player logic
         if maximizing_player:  # NEED TO CHANGE IF PLAYER == Defender

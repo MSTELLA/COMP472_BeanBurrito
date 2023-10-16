@@ -1,4 +1,0 @@
-Game Parameters:
- Timeout: 5.0 seconds
- Max number of turns: 100
- Play mode: AttackerVsDefender
