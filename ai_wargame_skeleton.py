@@ -338,14 +338,16 @@ class Game:
     stats: Stats = field(default_factory=Stats)
     _attacker_has_ai : bool = True
     _defender_has_ai : bool = True
-    #move_handler=MoveHandler()
-    #output_handler=OutputHandler()
+    move_handler=MoveHandler()
+    output_handler=OutputHandler()
+    minimax_handler = MinimaxHandler()
 
+    '''
     def __init__(self):
         self.minimax_handler = MinimaxHandler()
         self.move_handler = MoveHandler()
         self.output_handler = OutputHandler()
-
+    '''
 
 
     def __post_init__(self):

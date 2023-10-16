@@ -118,7 +118,7 @@ class MinimaxHandler:
     # method minimax with alphabeta
     def minimax(self, node, depth, maximizing_player, alpha_beta=False, alpha=-float('inf'), beta=float('inf')):
 
-        if depth == 0 or node.is_terminal():
+        if depth == 0 or node.game_tree.is_terminal():
             return self.calculate_heuristic(node)
 
         # Defender player logic
