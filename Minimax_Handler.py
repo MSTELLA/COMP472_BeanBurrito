@@ -54,17 +54,41 @@ class MinimaxHandler:
         # open distance between attackers units and defender AI, specifically Virus units because they can kill the AI in one hit
         # using the euclidean distance to calculate distance between units
         # defender is trying to maximize this number, and attacker is trying to minimize this number 
-        open_distance = 0
+        distance_to_defender_ai = 0
         unit_weights = [0.3, 0.3, 0.9, 0.1, 0.1] # AI, Tech, Virus, Program, Firewall weighted by their damage to AI
         # using 0.0 so that values arent too big
         defender_ai_location = (list(game.locate_unit_on_board(defender, "AI")))[0]
         for attacker_unit in game.player_units(attacker):
             distance = game.calculate_distance_units(defender_ai_location, attacker_unit[0])
-            open_distance += (unit_weights[attacker_unit[1].type.value] * distance)
+            distance_to_defender_ai += (unit_weights[attacker_unit[1].type.value] * distance)
 
         # inverse attacker damage potential , we use the inverse that that defender is always maximizing and attacker is minimizing
         # from current position what damage can be done
+        inverse_damage_potential = 0
+        for attacker_unit in game.player_units(attacker):
+            for adjacent in attacker_unit[1].iter_adjacent():
+                if not(game.is_empty(adjacent)) and (attacker_unit.player != adjacent.player): # for now we only consider damage is can do on the defender
+                        inverse_damage_potential -= attacker_unit.damage_amount(adjacent)
 
         # number of units engaged in combat
+        # defender engaged will minus and attacker engaged will add to this value, therefore
+        # # defender is trying to maximize this number, and attacker is trying to minimize this number 
+        number_units_engaged_in_combat = 0
+        for attacker_unit in game.player_units(attacker):
+            # (only 0:AI, 3:Program and 4:Firewall cannot move if engaged in combat)
+            if attacker_unit.type.value == 0 or attacker_unit.type.value == 3 or attacker_unit.type.value == 4:
+                for adjacent in attacker_unit[1].iter_adjacent():
+                    if not(game.is_empty(adjacent)) and (attacker_unit.player != adjacent.player):
+                            # they are engaged in combat
+                            number_units_engaged_in_combat += 1
 
-        return ai_health_dif + open_distance
+        for defender_unit in game.player_units(defender):
+            # (only 0:AI, 3:Program and 4:Firewall cannot move if engaged in combat)
+            if defender_unit.type.value == 0 or defender_unit.type.value == 3 or defender_unit.type.value == 4:
+                for adjacent in defender_unit[1].iter_adjacent():
+                    if not(game.is_empty(adjacent)) and (defender_unit.player != adjacent.player):
+                            # they are engaged in combat
+                            number_units_engaged_in_combat -= 1
+
+        # TODO : maybe we can add weights to these ?
+        return ai_health_dif + distance_to_defender_ai + inverse_damage_potential + number_units_engaged_in_combat

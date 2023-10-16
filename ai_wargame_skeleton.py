@@ -128,7 +128,7 @@ class Unit:
             return 9 - target.health
         return amount
 
-    def validate_move_direction(self,coords:CoordPair) -> bool:
+    def validate_move_direction(self, coords:CoordPair) -> bool:
         """Validate specific allowed moves for the player type and unit type (must receive already validated coordinates)"""
         directionality = coords.directionality #sets directionality of CoordPair and returns it
         if directionality==4: # If the source and destination are the same (self-destruct)
@@ -377,8 +377,6 @@ class Game:
             return self.board[coord.row][coord.col]
         else:
             return None
-        return self.board[coord.row][coord.col]
-
 
     def set(self, coord : Coord, unit : Unit | None):
         """Set contents of a board cell of the game at Coord."""
@@ -413,7 +411,7 @@ class Game:
         in the adjacent list (using iter_adjacent() method )"""
         return dst_coord in list(src_coord.iter_adjacent())
 
-    def is_valid_move(self, coords : CoordPair)-> bool: # TODO: IF AI MAKES AN INVALID MOVE => OTHER PLAYER WINS
+    def is_valid_move(self, coords: CoordPair)-> bool: # TODO: IF AI MAKES AN INVALID MOVE => OTHER PLAYER WINS
         """Validate a move expressed as a CoordPair."""
         if not self.is_valid_coord(coords.src) or not self.is_valid_coord(coords.dst): 
             print("The source or destination coordinates are not on the board.")
@@ -458,7 +456,7 @@ class Game:
         else:
             return False
 
-    def perform_move(self, coords : CoordPair) -> Tuple[bool,str]: #returns (success,result)
+    def perform_move(self, coords: CoordPair) -> Tuple[bool,str]: #returns (success,result)
         """Validate and perform a move expressed as a CoordPair."""
         if self.is_valid_move(coords): # validates coordinates source and target, sets action type and validates it
 
@@ -493,7 +491,7 @@ class Game:
                 return(True,self.move_handler.action_consequence)
         return (False,"invalid move")
 
-    def perform_move_on_board_only(self, coords : CoordPair) -> Tuple[bool,str]: #returns (success,board_state)
+    def perform_move_on_board_only(self, coords: CoordPair) -> Tuple[bool,str]: #returns (success,board_state)
         """Validate and perform a move expressed as a CoordPair."""
         board = self.board
         if self.is_valid_move(coords): # validates coordinates source and target, sets action type and validates it
