@@ -117,17 +117,17 @@ class MinimaxHandler:
             return self.calculate_heuristic(node)
 
         # Defender player logic
-        if maximizing_player: #NEED TO CHANGE IF PLAYER == Defender
+        if maximizing_player:  # NEED TO CHANGE IF PLAYER == Defender
             maxEval = -float('inf')
             for child in node.children:
                 # we are recursively calling the minimax player where the maximizing player is now false
-                #At this depth is the minimizing players turn (Attackers)
+                # At this depth it is the minimizing players turn (Attackers)
                 currentEval = self.minimax(child, depth - 1, False, alpha_beta, alpha, beta) #TODO somehow set player defender max and attacker min
-                maxEval = max(maxEval, currentEval) # will replace max eval if currentEval > maxEval
+                maxEval = max(maxEval, currentEval)  # will replace max eval if currentEval > maxEval
 
                 # if we turn on alpha beta pruning:
                 if alpha_beta:
-                    alpha = max(alpha, currentEval)
+                    alpha = max(alpha, currentEval)  # Setting our new alpha value (the larger number out of the two)
                     # If beta is greater than or equal to alpha, prune the rest of the branches!
                     if beta <= alpha:
                         break
@@ -139,14 +139,14 @@ class MinimaxHandler:
             minEval = float('inf')
             for child in node.children:
                 # we are recursively calling the minimax player where the maximizing player is now True
-                # At this depth is the minimizing players turn (Defenders)
+                # At this depth it is the minimizing players turn (Attackers)
                 currentEval = self.minimax(child,depth-1,True, alpha_beta, alpha, beta)
                 minEval = min(minEval, currentEval)
 
                 # if alpha beta is turned on
                 if alpha_beta:
-                    beta = min(beta,currentEval)
-                    #For min if alpha is greater than or equal to beta, PRUNEEE!
+                    beta = min(beta,currentEval)  # Setting our new beta value (the smaller number out of the two)
+                    # For min if alpha is greater than or equal to beta, PRUNE!
                     if beta <= alpha:
                         break
 
