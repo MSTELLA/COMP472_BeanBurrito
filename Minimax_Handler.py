@@ -16,11 +16,12 @@ class MinimaxHandler:
         self.game = game
         unit_weights = [9999, 3, 3, 3, 3] # AI, Tech, Virus, Program, Firewall
 
-        # P1 sum  - P2 sum, defender is P1 and attacker is P2 , therefore defender is minimizing and attacker is maximizing
+        # P1 sum - P2 sum, defender is P1 and attacker is P2 , therefore defender is maximizing and attacker is minimizing
         unit_count_p1, unit_count_p2 = [0, 0 , 0 , 0, 0], [0, 0 , 0 , 0, 0] # AI, Tech, Virus, Program, Firewall
         # get the number of units for each player
         for p1_unit in game.player_units(defender):
             unit_count_p1[p1_unit[1].type.value] += 1
+
         for p2_unit in game.player_units(attacker):
             unit_count_p2[p2_unit[1].type.value] += 1
 
@@ -55,8 +56,7 @@ class MinimaxHandler:
         # using the euclidean distance to calculate distance between units
         # defender is trying to maximize this number, and attacker is trying to minimize this number 
         distance_to_defender_ai = 0
-        unit_weights = [0.3, 0.3, 0.9, 0.1, 0.1] # AI, Tech, Virus, Program, Firewall weighted by their damage to AI
-        # using 0.0 so that values arent too big
+        unit_weights = [3, 3, 9, 1, 1] # AI, Tech, Virus, Program, Firewall weighted by their damage to AI
         defender_ai_location = game.locate_unit_ai_board(defender)
         for attacker_unit in game.player_units(attacker):
             distance = game.calculate_distance_units(defender_ai_location, attacker_unit[0])
