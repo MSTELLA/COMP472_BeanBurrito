@@ -330,8 +330,15 @@ class Game:
     stats: Stats = field(default_factory=Stats)
     _attacker_has_ai : bool = True
     _defender_has_ai : bool = True
-    move_handler=MoveHandler()
-    output_handler=OutputHandler()
+    #move_handler=MoveHandler()
+    #output_handler=OutputHandler()
+
+    def __init__(self):
+        self.minimax_handler = MinimaxHandler()
+        self.move_handler = MoveHandler()
+        self.output_handler = OutputHandler()
+
+
 
     def __post_init__(self):
         """Automatically called after class init to set up the default board state."""
@@ -725,19 +732,33 @@ class Game:
     def suggest_move(self) -> CoordPair | None: 
         """Suggest the next move using minimax alpha beta. TODO: REPLACE RANDOM_MOVE WITH PROPER GAME LOGIC!!!"""
         start_time = datetime.now() # Start time
-        (score, move, avg_depth) = self.random_move() # TODO CHANGE
+        # (score, move, avg_depth) = self.random_move() # TODO CHANGE
 
         # TESTING TREE
+        '''
         gametree_test = GameTree(self.clone(),0)
         gametree_test.expand_tree_max_levels()
         print_tree(gametree_test.root,attr_list=["move", "minimax"])
+        '''
 
+        # Initializing the game tree
+        game_tree = GameTree(self.clone(),0)
+        game_tree.expand_tree_max_levels()
+
+        # Initializing alpha, beta and depth for the minimax algorithm.
+        alpha = -float('inf')
+        beta = float('inf')
+        depth = 2 # TODO THE DEPTH IS HARDCODED, need to make it vary depending on the time alloted by user
+
+        # Suggest Random move according to the minimax function
+        (score, best_move) = (
+            self.minimax_handler.minimax(game_tree.root,depth,True,True,alpha,beta))
         elapsed_seconds = (datetime.now() - start_time).total_seconds() # End time
 
         # Below is generating statistics and printing them
         self.stats.total_seconds += elapsed_seconds
         print(f"Heuristic score: {score}")
-        print(f"Average recursive depth: {avg_depth:0.1f}")
+        # print(f"Average recursive depth: {avg_depth:0.1f}") #TODO figure out how to implement this
         print(f"Evals per depth: ",end='')
         for k in sorted(self.stats.evaluations_per_depth.keys()):
             print(f"{k}:{self.stats.evaluations_per_depth[k]} ",end='')
@@ -746,7 +767,7 @@ class Game:
         if self.stats.total_seconds > 0:
             print(f"Eval perf.: {total_evals/self.stats.total_seconds/1000:0.1f}k/s")
         print(f"Elapsed time: {elapsed_seconds:0.1f}s")
-        return move
+        return best_move
 
     def post_move_to_broker(self, move: CoordPair):
         """Send a move to the game broker."""
