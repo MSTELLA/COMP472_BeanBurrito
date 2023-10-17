@@ -333,6 +333,7 @@ class Game:
     """Representation of the game state."""
     board: list[list[Unit | None]] = field(default_factory=list)
     next_player: Player = Player.Attacker
+    next_player_opp: Player = Player.Defender
     turns_played : int = 0
     options: Options = field(default_factory=Options)
     stats: Stats = field(default_factory=Stats)
@@ -581,6 +582,7 @@ class Game:
     def next_turn(self):
         """Transitions game to the next turn."""
         self.next_player = self.next_player.next()
+        self.next_player_opp = self.next_player_opp.next()
         self.turns_played += 1
 
     def to_string(self) -> str:
@@ -685,9 +687,13 @@ class Game:
 
     def computer_turn(self) -> CoordPair | None: # TODO TO INSPECT
         """Computer plays a move."""
+        print("About to call suggest_move from computer_turn...")
         mv = self.suggest_move()
+        print(f"suggest_move returned move: {mv} in computer_turn")
         if mv is not None:
+            print(f"Attempting to perform move: {mv}")
             (success,result) = self.perform_move(mv) # validates and performs
+            print(f"Move performed with success status: {success}")
             if success:
                 print(f"Computer {self.next_player.name}: ",end='')
                 print(result)
@@ -739,7 +745,8 @@ class Game:
         else:
             return (0, None, 0)
 
-    def suggest_move(self) -> CoordPair | None: 
+    def suggest_move(self) -> CoordPair | None:
+        print("Entering suggest_move...\n")
         """Suggest the next move using minimax alpha beta. TODO: REPLACE RANDOM_MOVE WITH PROPER GAME LOGIC!!!"""
         start_time = datetime.now() # Start time
         # (score, move, avg_depth) = self.random_move() # TODO CHANGE
@@ -753,7 +760,9 @@ class Game:
 
         # Initializing the game tree
         game_tree = GameTree(self.clone(),0)
+        print("GameTree initialized.")
         game_tree.expand_tree_max_levels()
+        print("GameTree expanded.")
 
         # Initializing alpha, beta and depth for the minimax algorithm.
         alpha = -float('inf')
@@ -761,8 +770,10 @@ class Game:
         depth = 2 # TODO THE DEPTH IS HARDCODED, need to make it vary depending on the time alloted by user
 
         # Suggest Random move according to the minimax function
+        print("About to call minimax...")
         (score, best_move) = (
             self.minimax_handler.minimax(game_tree.root,depth,True,True,alpha,beta))
+        print(f"Minimax returned with score: {score} and best_move: {best_move}")
         elapsed_seconds = (datetime.now() - start_time).total_seconds() # End time
 
         # Below is generating statistics and printing them
@@ -777,6 +788,7 @@ class Game:
         if self.stats.total_seconds > 0:
             print(f"Eval perf.: {total_evals/self.stats.total_seconds/1000:0.1f}k/s")
         print(f"Elapsed time: {elapsed_seconds:0.1f}s")
+        print(f"Exiting suggest_move with move: {best_move}")
         return best_move
 
     def post_move_to_broker(self, move: CoordPair):

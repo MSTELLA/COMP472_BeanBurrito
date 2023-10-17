@@ -8,10 +8,6 @@ class MinimaxHandler:
 
     # create Search Tree wiht minmax levels?
 
-    # method minimax
-
-    # method minimax with alphabeta
-
     # heuristic e0
     '''
     - e0 = (3VP1 + 3TP1 + 3FP1 + 3PP1 + 9999AIP1) - (3VP2 + 3TP2 + 3FP2 + 3PP2 + 9999AIP2) where:
@@ -109,7 +105,7 @@ class MinimaxHandler:
     # TODO implement a if else statement that calculates heuristic depending on heuristic chosen by user.
     def calculate_heuristic(self, node):
         self.game = node.game
-        return self.e0(node.game, self.game.next_player, self.game.next_player)  # NOT SURE IF RIGHT WAY TO IMPLEMENT
+        return self.e0(node.game, self.game.next_player_opp, self.game.next_player)  # NOT SURE IF RIGHT WAY TO IMPLEMENT
 
 
     # method minimax with alphabeta
