@@ -73,8 +73,7 @@ class MinimaxHandler:
             for adjacent in attacker_unit[0].iter_adjacent():
                 if game.get(adjacent) is not None:
                     unit = game.get(adjacent)
-                    if attacker_unit[
-                        1].player != unit.player:  # for now we only consider damage is can do on the defender
+                    if attacker_unit[1].player != unit.player:  # for now we only consider damage is can do on the defender
                         inverse_damage_potential -= attacker_unit.damage_amount(unit)
 
         # number of units engaged in combat
