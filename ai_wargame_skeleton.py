@@ -333,7 +333,7 @@ class Game:
     """Representation of the game state."""
     board: list[list[Unit | None]] = field(default_factory=list)
     next_player: Player = Player.Attacker
-    next_player_opp: Player = Player.Defender
+    players: Tuple[Player] = (Player.Defender, Player.Attacker)
     turns_played : int = 0
     options: Options = field(default_factory=Options)
     stats: Stats = field(default_factory=Stats)

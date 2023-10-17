@@ -104,7 +104,7 @@ class MinimaxHandler:
     # TODO implement a if else statement that calculates heuristic depending on heuristic chosen by user.
     def calculate_heuristic(self, node):
         self.game = node.game
-        return self.e0(node.game, self.game.next_player_opp, self.game.next_player)  # NOT SURE IF RIGHT WAY TO IMPLEMENT
+        return self.e0(node.game, self.game.players[0], self.game.players[1])  # NOT SURE IF RIGHT WAY TO IMPLEMENT
 
 
     # method minimax with alphabeta
