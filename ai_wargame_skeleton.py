@@ -314,6 +314,7 @@ class Options:
     max_time : float | None = 5.0
     game_type : GameType = GameType.AttackerVsDefender
     alpha_beta : bool = True
+    heuristic : str | None ="e0"
     max_turns : int | None = 100
     randomize_moves : bool = True
     broker : str | None = None # What is this for?
@@ -325,6 +326,11 @@ class Stats:
     """Representation of the global game statistics."""
     evaluations_per_depth : dict[int,int] = field(default_factory=dict)
     total_seconds: float = 0.0
+    score_current_action: float = 0.0
+    elapsed_seconds_current_action: float = 0.0
+    cumulative_evals: int = 0
+    cumulative_perc_evals_by_depth # TODO
+    average_branching_factor # TODO
 
 ##############################################################################################################
 
@@ -798,40 +804,36 @@ class Game:
         print("Entering suggest_move...\n")
         """Suggest the next move using minimax alpha beta."""
         start_time = datetime.now() # Start time
-        # (score, move, avg_depth) = self.random_move() # TODO CHANGE
-
-        # TESTING TREE
-        '''
-        gametree_test = GameTree(self.clone(),0)
-        gametree_test.expand_tree_max_levels()
-        print_tree(gametree_test.root,attr_list=["move", "minimax"])
-        '''
+        # (score, move, avg_depth) = self.random_move()
 
         # Initializing the game tree
-        game_tree = GameTree(self.clone())
+        game_tree = GameTree(self.clone(),3) # TODO THE DEPTH IS HARDCODED, need to make it vary depending on the time alloted by user
         print("GameTree initialized.")
         game_tree.expand_tree_max_levels()
-        print("GameTree expanded.")
-        # print_tree(game_tree.root,attr_list=["minimax"])
+        # TODO: RETURN BRANCHING FACTOR
+        print("GameTree expanded")
+        # print_tree(game_tree.root,attr_list=["minimax", "move"])
 
         # Initializing alpha, beta and depth for the minimax algorithm.
         alpha = -float('inf')
         beta = float('inf')
-        depth = 3 # TODO THE DEPTH IS HARDCODED, need to make it vary depending on the time alloted by user
+        depth = 3 # TODO THE DEPTH IS HARDCODED, need to make it vary depending on the time alloted by user = > Nothing is done with depth
 
         # Suggest Random move according to the minimax function
         print("About to call minimax...")
         (score, best_move) = (
-            self.minimax_handler.minimax(game_tree.root,depth,False,alpha,beta))
+            self.minimax_handler.minimax(game_tree.root,depth,self.options.alpha_beta,alpha,beta))
             # self.minimax_handler.minimax(game_tree.root,depth,True,True,alpha,beta))
         print(f"Minimax returned with score: {score} and best_move: {best_move}")
 
         elapsed_seconds = (datetime.now() - start_time).total_seconds() # End time
 
         # Below is generating statistics and printing them
+        self.stats.cumulative_evals = self.minimax_handler.heuristic_counter
+        self.stats.elapsed_seconds_current_action = elapsed_seconds
+        self.stats.score_current_action = score
         self.stats.total_seconds += elapsed_seconds
         print(f"Heuristic score: {score}")
-        # print(f"Average recursive depth: {avg_depth:0.1f}") #TODO figure out how to implement this
         print(f"Evals per depth: ",end='')
         for k in sorted(self.stats.evaluations_per_depth.keys()):
             print(f"{k}:{self.stats.evaluations_per_depth[k]} ",end='')
@@ -970,15 +972,16 @@ def main():
     else:
         options.game_type = GameType.CompVsComp
 
-    if (game_type != GameType.AttackerVsDefender):
+    if (options.game_type != GameType.AttackerVsDefender):
         alpha_beta = input("Enter whether alpha-beta is on or off (on|off): ")
+        options.heuristic = input("Enter the name of your heuristic (e0|e1|e2): ")
         if alpha_beta == 'on': options.alpha_beta = True
         else: options.alpha_beta = False
 
-    # heuristic = input("Enter the name of your heuristic (e0|e1|e2): ")
-
     # create a new game
     game = Game(options=options)
+    # set heuristic in minimax handler
+    game.minimax_handler.set_heuristic(game.options.heuristic)
 
     #  OutputHandler creates the game file and writes the game parameters
     game.output_handler.setupfile(game.options)
@@ -1020,6 +1023,7 @@ def main():
         else:     # AI Attacker and AI Defender or simply AI turn
             player = game.next_player 
             move = game.computer_turn()
+            game.output_handler.write_turn(game)
             if move is not None:
                 game.post_move_to_broker(move) # Sends suggested move from computer_turn() to 
             else:

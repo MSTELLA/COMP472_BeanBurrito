@@ -4,8 +4,8 @@ from bigtree import Node, print_tree
 class GameTree:
     time_info=None
 
-    def __init__(self, current_game, max_search_depth = 3):
-        current_player_minimax = "MIN" if current_game.next_player.value == 1 else "MAX" # We maximize for defender, minimize for attacker
+    def __init__(self, current_game, max_search_depth = 2):
+        current_player_minimax = "MIN" if current_game.next_player.value == 0 else "MAX" # We maximize for defender (1), minimize for attacker (0)
         self.root = Node("current_game", game=current_game, minimax = current_player_minimax)
         self.max_search_depth = max_search_depth
         # self.backup = current_game.complete_clone() #backup game to set at the end
@@ -43,7 +43,6 @@ class GameTree:
             minimax =  "MAX" if parent_node.get_attr("minimax")=="MIN" else "MIN" # Heuristics made to be maximized by defender and minimized by attacker
             
             newgame.next_turn()
-
 
             #Create a new Node
             id = "node_level(" + str(parent_node.depth) + ")-childnode(" + str(i) + ")" # Node id

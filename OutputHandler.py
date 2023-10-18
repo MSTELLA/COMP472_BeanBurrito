@@ -23,16 +23,33 @@ class OutputHandler:
 
     def start_game_string(self,options):
         start_game_string="Game Parameters:\n Timeout: "+ str(options.max_time) + " seconds" + "\n Max number of turns: " + str(options.max_turns) + "\n Play mode: " + options.game_type.name
-        # + "\n Alpha-Beta: " + options.alpha_beta => Future Deliverable
-        #  If a player is an AI, indicate the name of your heuristic => Future Deliverable
+        if (options.game_type.value != 0):  # AttackerVsDefender = 0
+            start_game_string += "\n Alpha-Beta: " + str(options.alpha_beta)
+            start_game_string +=  "\n Heuristic: " + options.heuristic 
+        
+        start_game_string += "\n"
         return start_game_string
 
     def write_turn(self,game):
         turn_string="\nTurn #" + str(game.turns_played) +"\n "
         current_player= "Attacker" if game.next_player.value==0 else "Defender"
         turn_string += current_player + ": " 
-        turn_string += game.move_handler.ACTION.name + " from "+game.move_handler.coords.src.to_string() + " to " +game.move_handler.coords.dst.to_string() +"\n"
-        turn_string += game.board_print() + "\n"
+        turn_string += game.move_handler.ACTION.name + " from "+game.move_handler.coords.src.to_string() + " to " +game.move_handler.coords.dst.to_string()
+
+        if (game.options.game_type.value == 3): #  CompVsComp = 3
+            turn_string += "\n time for this action: " + str(round(game.stats.elapsed_seconds_current_action,2)) + "s"
+            turn_string += "\n heuristic score: " + str(game.stats.score_current_action)
+
+        elif (game.options.game_type.value == 1 and game.next_player.value==1 ): #     AttackerVsComp = 1     Defender = 1
+            turn_string += "\n time for this action: " + str(round(game.stats.elapsed_seconds_current_action,2)) + "s"
+            turn_string += "\n heuristic score: " + str(game.stats.score_current_action)
+
+        elif (game.options.game_type.value == 2 and game.next_player.value==0 ): #     CompVsDefender = 2     Attacker = 0
+            turn_string += "\n time for this action: " + str(round(game.stats.elapsed_seconds_current_action,2)) + "s"
+            turn_string += "\n heuristic score: " + str(game.stats.score_current_action)
+
+        turn_string += "\n" + game.board_print() + "\n"
+
         with open(self.filepath, 'a') as file:
             file.write(turn_string)
 

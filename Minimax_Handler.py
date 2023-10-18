@@ -3,8 +3,12 @@ from GameTree import GameTree
 
 
 class MinimaxHandler:
-    heuristic = "e0" # Must be set manually
+    heuristic = ""
     game = None
+    heuristic_counter = 0
+
+    def set_heuristic(self, heuristic):
+        self.heuristic = heuristic
 
     # heuristic e0
     '''
@@ -101,7 +105,10 @@ class MinimaxHandler:
 
     # TODO implement a if else statement that calculates heuristic depending on heuristic chosen by user.
     def calculate_heuristic(self, node):
-        self.game = node.game # NEEDED FOR SOMETHING?
+        self.calculate_heuristic += 1
+
+        self.game = node.game
+
         if self.heuristic == "e0":
             return self.e0(node.game, self.game.players[0], self.game.players[1])
         elif self.heuristic =="e1":
@@ -112,8 +119,8 @@ class MinimaxHandler:
 
     # method minimax with alphabeta option
     def minimax(self, node, depth, alpha_beta=False, alpha=-float('inf'), beta=float('inf')):
-        if node.is_root:
-            print("root node is at level: " ,str(node.depth), " and is ", node.get_attr("minimax"))
+        # if node.is_root:
+        #     self.calculate_heuristic = 0 # Reset counter => No need?
 
         if node.is_leaf:
             e_node = self.calculate_heuristic(node)
@@ -121,7 +128,7 @@ class MinimaxHandler:
             # return self.calculate_heuristic(node), None
             return e_node, node.get_attr("move")
 
-        print("node is at level: " ,str(node.depth), " and is", node.get_attr("minimax"))
+        # print("node is at level: " ,str(node.depth), " and is", node.get_attr("minimax"))
 
         # Defender player logic
         if node.get_attr("minimax") == "MAX":
@@ -136,7 +143,7 @@ class MinimaxHandler:
                 # In suggest_move we are storing the returns in a two variable tuple, therefor need to store best move
                 if currentEval > maxEval:
                     maxEval = currentEval
-                    bestMove = currentMove
+                    bestMove = child.get_attr("move") # best move is the move in the leaf...so should be child.
 
                 # if we turn on alpha beta pruning:
                 if alpha_beta:
@@ -144,7 +151,7 @@ class MinimaxHandler:
                     # If beta is greater than or equal to alpha, prune the rest of the branches!
                     if beta <= alpha:
                         break
-            print("Best heuristic value: ", maxEval, " and best move: ", str(bestMove))
+            # print("Best heuristic value: ", maxEval, " and best move: ", str(bestMove))
             return maxEval, bestMove
 
         # Attacker Player Logic
@@ -159,7 +166,7 @@ class MinimaxHandler:
 
                 if currentEval < minEval:
                     minEval = currentEval
-                    bestMove = currentMove
+                    bestMove = child.get_attr("move") 
 
                 # if alpha beta is turned on
                 if alpha_beta:
@@ -167,5 +174,5 @@ class MinimaxHandler:
                     # For min if alpha is greater than or equal to beta, PRUNE!
                     if beta <= alpha:
                         break
-            print("Best heuristic value: ", minEval, " and best move: ", str(bestMove))
+            # print("Best heuristic value: ", minEval, " and best move: ", str(bestMove))
             return minEval, bestMove
