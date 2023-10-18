@@ -350,7 +350,6 @@ class Game:
         self.output_handler = OutputHandler()
     '''
 
-
     def __post_init__(self):
         """Automatically called after class init to set up the default board state."""
         dim = self.options.dim
@@ -377,13 +376,6 @@ class Game:
         new = copy.copy(self)
         new.board = copy.deepcopy(self.board)
         return new
-    
-    # def complete_clone(self) -> Game:
-    #     """Make a new copy of a game for minimax recursion.
-    #     Deep copy of everything except the board (options and stats are shared).
-    #     """
-    #     new = copy.deepcopy(self)
-    #     return new
 
     def is_empty(self, coord : Coord) -> bool:
         """Check if contents of a board cell of the game at Coord is empty (must be valid coord)."""
@@ -429,7 +421,7 @@ class Game:
         in the adjacent list (using iter_adjacent() method )"""
         return dst_coord in list(src_coord.iter_adjacent())
 
-    def is_valid_move(self, coords: CoordPair)-> bool: # TODO: IF AI MAKES AN INVALID MOVE => OTHER PLAYER WINS
+    def is_valid_move(self, coords: CoordPair)-> bool:
         """Validate a move expressed as a CoordPair."""
         if not self.is_valid_coord(coords.src) or not self.is_valid_coord(coords.dst): 
             print("The source or destination coordinates are not on the board.")
@@ -443,6 +435,51 @@ class Game:
             return False
         elif src_unit.player != self.next_player: # Source coordinate is empty or not the player's unit
             print("The Source coordinates contain an unit that belongs to the adversary.")
+            return False
+
+        # set Directionality of CoordPair
+        coords.directionality=coords.move_directionality()
+
+        # DETERMINE TYPE OF ACTION
+        self.move_handler.action_type(src_unit,dst_unit,coords) # sets action type
+        action_type= self.move_handler.ACTION.value # 0: Movement 1: Attack 2: Repair 3: Self-Destruct
+        # print("STEPS: Action determined to be #",action_type)
+
+        # VALIDATE SELFDESTRUCT
+        if action_type==3:
+            #coordinates and unit belonging to player already validated
+            self.move_handler.validate_selfdestruct(src_unit, coords)
+            return True
+        
+        # VALIDATE ATTACK
+        elif action_type==1:
+            return self.move_handler.validate_attack(src_unit, dst_unit, coords)
+
+        # VALIDATE MOVEMENT
+        elif action_type==0:
+            return self.move_handler.validate_movement(src_unit, coords, self.board)
+
+        # VALIDATE REPAIR
+        elif action_type==2:
+            return self.move_handler.validate_repair(src_unit, dst_unit, coords)
+        
+        else:
+            return False
+
+    def is_valid_move_internal(self, coords: CoordPair)-> bool:
+        """Validate a move expressed as a CoordPair INTERNALLY, meaning no print statements."""
+        if not self.is_valid_coord(coords.src) or not self.is_valid_coord(coords.dst): 
+            # print("The source or destination coordinates are not on the board.")
+            return False
+
+        src_unit = self.get(coords.src) # Get Source unit
+        dst_unit = self.get(coords.dst) # Get Destination unit
+
+        if src_unit is None:
+            # print("The Source coordinates contain no unit.")
+            return False
+        elif src_unit.player != self.next_player: # Source coordinate is empty or not the player's unit
+            # print("The Source coordinates contain an unit that belongs to the adversary.")
             return False
 
         # set Directionality of CoordPair
@@ -512,7 +549,7 @@ class Game:
     def perform_move_on_board_only(self, coords: CoordPair) -> Tuple[bool,str]: #returns (success,board_state)
         """Validate and perform a move expressed as a CoordPair."""
         board = self.board
-        if self.is_valid_move(coords): # validates coordinates source and target, sets action type and validates it
+        if self.is_valid_move_internal(coords): # validates coordinates source and target, sets action type and validates it
 
             # print("STEPS: Will now perform move")
             action_type= self.move_handler.ACTION.value # 0: Movement 1: Attack 2: Repair 3: Self-Destruct
@@ -554,7 +591,7 @@ class Game:
                 repairVal = src_unit.repair_amount(dstUnit)  # repair_amount gets value from table provided
                 # Using mutator method mod_health to modify unit's health
                 dstUnit.mod_health(repairVal)
-                self.repair_string(src_unit, src_coordinates, dst_coordinates, repairVal)
+                # self.repair_string(src_unit, src_coordinates, dst_coordinates, repairVal)
                 return(True)
             
             # PERFORM SELF-DESTRUCT
@@ -582,7 +619,7 @@ class Game:
     def next_turn(self):
         """Transitions game to the next turn."""
         self.next_player = self.next_player.next()
-        self.next_player_opp = self.next_player_opp.next()
+        # self.next_player_opp = self.next_player_opp.next()
         self.turns_played += 1
 
     def to_string(self) -> str:
@@ -723,6 +760,18 @@ class Game:
                 return Player.Attacker    
         elif self._defender_has_ai:
             return Player.Defender
+    
+    def has_winner_internal(self) -> Player | None:
+        """Check if the game is over and returns winner, INTERAL = No printing statements"""
+        if self.options.max_turns is not None and self.turns_played >= self.options.max_turns:
+            return Player.Defender
+        elif self._attacker_has_ai:
+            if self._defender_has_ai:
+                return None
+            else:
+                return Player.Attacker    
+        elif self._defender_has_ai:
+            return Player.Defender
 
     def move_candidates(self) -> Iterable[CoordPair]: # GENERATES MOVE CANDIDATES OF ONE NODE over all this player's unit
         """Generate valid move candidates for the next player."""
@@ -731,7 +780,7 @@ class Game:
             move.src = src
             for dst in src.iter_adjacent():
                 move.dst = dst
-                if self.is_valid_move(move):
+                if self.is_valid_move_internal(move):
                     yield move.clone()
             move.dst = src
             yield move.clone()
@@ -747,7 +796,7 @@ class Game:
 
     def suggest_move(self) -> CoordPair | None:
         print("Entering suggest_move...\n")
-        """Suggest the next move using minimax alpha beta. TODO: REPLACE RANDOM_MOVE WITH PROPER GAME LOGIC!!!"""
+        """Suggest the next move using minimax alpha beta."""
         start_time = datetime.now() # Start time
         # (score, move, avg_depth) = self.random_move() # TODO CHANGE
 
@@ -759,21 +808,24 @@ class Game:
         '''
 
         # Initializing the game tree
-        game_tree = GameTree(self.clone(),0)
+        game_tree = GameTree(self.clone())
         print("GameTree initialized.")
         game_tree.expand_tree_max_levels()
         print("GameTree expanded.")
+        # print_tree(game_tree.root,attr_list=["minimax"])
 
         # Initializing alpha, beta and depth for the minimax algorithm.
         alpha = -float('inf')
         beta = float('inf')
-        depth = 2 # TODO THE DEPTH IS HARDCODED, need to make it vary depending on the time alloted by user
+        depth = 3 # TODO THE DEPTH IS HARDCODED, need to make it vary depending on the time alloted by user
 
         # Suggest Random move according to the minimax function
         print("About to call minimax...")
         (score, best_move) = (
-            self.minimax_handler.minimax(game_tree.root,depth,True,True,alpha,beta))
+            self.minimax_handler.minimax(game_tree.root,depth,False,alpha,beta))
+            # self.minimax_handler.minimax(game_tree.root,depth,True,True,alpha,beta))
         print(f"Minimax returned with score: {score} and best_move: {best_move}")
+
         elapsed_seconds = (datetime.now() - start_time).total_seconds() # End time
 
         # Below is generating statistics and printing them

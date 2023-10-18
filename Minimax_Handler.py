@@ -3,17 +3,14 @@ from GameTree import GameTree
 
 
 class MinimaxHandler:
-    heuristic = ""
+    heuristic = "e0" # Must be set manually
     game = None
-
-    # create Search Tree wiht minmax levels?
 
     # heuristic e0
     '''
     - e0 = (3VP1 + 3TP1 + 3FP1 + 3PP1 + 9999AIP1) - (3VP2 + 3TP2 + 3FP2 + 3PP2 + 9999AIP2) where:
         VPi =nbofVirusofPlayeri TPi =nbofTechofPlayeri FPi =nbofFirewallofPlayeri PPi =nbofProgramofPlayeri AIPi =nbofAIofPlayeri
     '''
-
     def e0(self, game, defender, attacker) -> int:
         self.game = game
         unit_weights = [9999, 3, 3, 3, 3]  # AI, Tech, Virus, Program, Firewall
@@ -38,10 +35,10 @@ class MinimaxHandler:
     '''
     - AI health difference (attacker wants to minimize defender AI health) (defender wants to maximize defender AI health)
     '''
-
     def e1(self, game, defender, attacker) -> int:
         # defender is trying to maximize this number, and attacker is trying to minimize this number 
         return game.player_ai_health(defender) - game.player_ai_health(attacker)
+
 
     # heuristic e2
     '''
@@ -101,28 +98,40 @@ class MinimaxHandler:
         # TODO : maybe we can add weights to these ?
         return ai_health_dif + distance_to_defender_ai + inverse_damage_potential + number_units_engaged_in_combat
 
+
     # TODO implement a if else statement that calculates heuristic depending on heuristic chosen by user.
     def calculate_heuristic(self, node):
-        self.game = node.game
-        return self.e0(node.game, self.game.players[0], self.game.players[1])  # NOT SURE IF RIGHT WAY TO IMPLEMENT
+        self.game = node.game # NEEDED FOR SOMETHING?
+        if self.heuristic == "e0":
+            return self.e0(node.game, self.game.players[0], self.game.players[1])
+        elif self.heuristic =="e1":
+            return self.e1(node.game, self.game.players[0], self.game.players[1]) 
+        elif self.heuristic =="e3":
+            return self.e2(node.game, self.game.players[0], self.game.players[1]) 
 
 
-    # method minimax with alphabeta
-    def minimax(self, node, depth, maximizing_player, alpha_beta=False, alpha=-float('inf'), beta=float('inf')):
+    # method minimax with alphabeta option
+    def minimax(self, node, depth, alpha_beta=False, alpha=-float('inf'), beta=float('inf')):
+        if node.is_root:
+            print("root node is at level: " ,str(node.depth), " and is ", node.get_attr("minimax"))
 
-        # if depth == 0 or node.is_terminal():
-        if depth == 0: #TODO fix node.is_terminal()!!!!!!
-            return self.calculate_heuristic(node), None
+        if node.is_leaf:
+            e_node = self.calculate_heuristic(node)
+            # print("REACHED LEAF ", str(node.get_attr("move")), "at level ", str(node.depth), " with e(n): ", str(e_node))
+            # return self.calculate_heuristic(node), None
+            return e_node, node.get_attr("move")
+
+        print("node is at level: " ,str(node.depth), " and is", node.get_attr("minimax"))
 
         # Defender player logic
-        if maximizing_player:  # NEED TO CHANGE IF PLAYER == Defender
+        if node.get_attr("minimax") == "MAX":
             maxEval = -float('inf')
             bestMove = None
             for child in node.children:
                 # we are recursively calling the minimax player where the maximizing player is now false
                 # At this depth it is the minimizing players turn (Attackers)
-                currentEval, currentMove = self.minimax(child, depth - 1, False, alpha_beta, alpha,
-                                           beta)  # TODO somehow set player defender max and attacker min
+                currentEval, currentMove = self.minimax(child, depth - 1, alpha_beta, alpha,
+                                           beta)
 
                 # In suggest_move we are storing the returns in a two variable tuple, therefor need to store best move
                 if currentEval > maxEval:
@@ -135,7 +144,7 @@ class MinimaxHandler:
                     # If beta is greater than or equal to alpha, prune the rest of the branches!
                     if beta <= alpha:
                         break
-
+            print("Best heuristic value: ", maxEval, " and best move: ", str(bestMove))
             return maxEval, bestMove
 
         # Attacker Player Logic
@@ -146,7 +155,7 @@ class MinimaxHandler:
             for child in node.children:
                 # we are recursively calling the minimax player where the maximizing player is now True
                 # At this depth it is the minimizing players turn (Attackers)
-                currentEval, currentMove = self.minimax(child, depth - 1, True, alpha_beta, alpha, beta)
+                currentEval, currentMove = self.minimax(child, depth - 1, alpha_beta, alpha, beta)
 
                 if currentEval < minEval:
                     minEval = currentEval
@@ -158,5 +167,5 @@ class MinimaxHandler:
                     # For min if alpha is greater than or equal to beta, PRUNE!
                     if beta <= alpha:
                         break
-
+            print("Best heuristic value: ", minEval, " and best move: ", str(bestMove))
             return minEval, bestMove
