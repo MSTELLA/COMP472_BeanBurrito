@@ -11,6 +11,42 @@ class MinimaxHandler:
     def set_heuristic(self, heuristic):
         self.heuristic = heuristic
 
+    def self_destruct_potential(self, game, defender, attacker) -> int:
+        defender_ai = game.ai_unit_on_board(defender)
+        attacker_ai = game.ai_unit_on_board(attacker)
+        
+        if (defender_ai == None): return -1000 # ATTACKER WINS
+        elif (attacker_ai == None): return 1000 # DEFENDER WINS
+
+        potential = 0
+        if game.next_player == attacker:
+            for attacker_unit in game.player_units(attacker):
+                for adjacent in attacker_unit[0].iter_adjacent():
+                    if game.get(adjacent) is not None:
+                        unit = game.get(adjacent)
+                        if attacker_unit[1].player != unit.player: 
+                            # if they do damage to opponenent AI this is good !
+                            if unit.unit_name == "AI": potential -= 10 * (2)
+                            else: potential -= 2 # else its oki
+                        else:
+                            # if they do damage to opponenent AI this is bad !
+                            if unit.unit_name == "AI": potential += 10 * (2)
+                            else: potential += 2 # else its oki
+        else:
+            for defender_unit in game.player_units(defender):
+                for adjacent in defender_unit[0].iter_adjacent():
+                    if game.get(adjacent) is not None:
+                        unit = game.get(adjacent)
+                        if defender_unit[1].player != unit.player: 
+                            # if they do damage to opponenent AI this is good !
+                            if unit.unit_name == "AI": potential += 10 * (2)
+                            else: potential += 2 # else its oki
+                        else:
+                            # if they do damage to opponenent AI this is bad !
+                            if unit.unit_name == "AI": potential -= 10 * (2)
+                            else: potential -= 2 # else its oki
+        return potential
+
     # heuristic e0
     '''
     - e0 = (3VP1 + 3TP1 + 3FP1 + 3PP1 + 9999AIP1) - (3VP2 + 3TP2 + 3FP2 + 3PP2 + 9999AIP2) where:
@@ -48,14 +84,14 @@ class MinimaxHandler:
         if (defender_ai == None): return -1000 # ATTACKER WINS
         elif (attacker_ai == None): return 1000 # DEFENDER WINS
 
-        return game.ai_unit_on_board(defender)[1].health - game.ai_unit_on_board(attacker)[1].health
+        return (game.ai_unit_on_board(defender)[1].health - game.ai_unit_on_board(attacker)[1].health) + self.self_destruct_potential(game, defender, attacker)
 
 
     # heuristic e2
     '''
 	- AI health difference (attacker wants to minimize defender AI health) (defender wants to maximize defender AI health)
 	- Open distance between attacker units and defender AI (minimize) (inverse so that defender wants to maximize defender AI health)
-	- Damage potential (AI damage separate from defender units) ( utilizes self-destruct )
+	- Damage potential (AI damage separate from defender units)
     - Number of units engaged in combat
     '''
 
@@ -113,10 +149,9 @@ class MinimaxHandler:
                             number_units_engaged_in_combat -= 1
 
         # TODO : maybe we can add weights to these ?
-        return ai_health_dif + distance_to_defender_ai + inverse_damage_potential + number_units_engaged_in_combat
+        return ai_health_dif + distance_to_defender_ai + inverse_damage_potential + number_units_engaged_in_combat + self.self_destruct_potential(game, defender, attacker)
 
 
-    # TODO implement a if else statement that calculates heuristic depending on heuristic chosen by user.
     def calculate_heuristic(self, node):
         #self.calculate_heuristic += 1
 
