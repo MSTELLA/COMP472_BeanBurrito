@@ -818,12 +818,12 @@ class Game:
         # Initializing alpha, beta and depth for the minimax algorithm.
         alpha = -float('inf')
         beta = float('inf')
-        depth = 3 # TODO THE DEPTH IS HARDCODED, need to make it vary depending on the time alloted by user = > Nothing is done with depth
+        depth = 30
 
         # Suggest Random move according to the minimax function
         print("About to call minimax...")
         (score, best_move) = (
-            self.minimax_handler.minimax_timed(game_tree.root,depth,self.options.alpha_beta,alpha,beta,self.options.max_time))
+            self.minimax_handler.iter_deep_minimax(game_tree.root,depth,self.options.alpha_beta,self.options.max_time))
             # self.minimax_handler.minimax(game_tree.root,depth,True,True,alpha,beta))
         print(f"Minimax returned with score: {score} and best_move: {best_move}")
 
