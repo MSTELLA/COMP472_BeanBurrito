@@ -42,7 +42,13 @@ class MinimaxHandler:
     '''
     def e1(self, game, defender, attacker) -> int:
         # defender is trying to maximize this number, and attacker is trying to minimize this number 
-        return game.player_ai_health(defender) - game.player_ai_health(attacker)
+        defender_ai = game.ai_unit_on_board(defender)
+        attacker_ai = game.ai_unit_on_board(attacker)
+        
+        if (defender_ai == None): return -1000 # ATTACKER WINS
+        elif (attacker_ai == None): return 1000 # DEFENDER WINS
+
+        return game.ai_unit_on_board(defender)[1].health - game.ai_unit_on_board(attacker)[1].health
 
 
     # heuristic e2
@@ -54,16 +60,22 @@ class MinimaxHandler:
     '''
 
     def e2(self, game, defender, attacker) -> int:
+
+        defender_ai = game.ai_unit_on_board(defender)
+        attacker_ai = game.ai_unit_on_board(attacker)
+        
+        if (defender_ai == None): return -1000 # ATTACKER WINS
+        elif (attacker_ai == None): return 1000 # DEFENDER WINS
         # difference in AI health
         # defender is trying to maximize this number, and attacker is trying to minimize this number 
-        ai_health_dif = game.player_ai_health(defender) - game.player_ai_health(attacker)
-
+        ai_health_dif = game.ai_unit_on_board(defender)[1].health - game.ai_unit_on_board(attacker)[1].health
+        
         # open distance between attackers units and defender AI, specifically Virus units because they can kill the AI in one hit
         # using the euclidean distance to calculate distance between units
         # defender is trying to maximize this number, and attacker is trying to minimize this number 
         distance_to_defender_ai = 0
         unit_weights = [3, 3, 9, 1, 1]  # AI, Tech, Virus, Program, Firewall weighted by their damage to AI
-        defender_ai_location = game.locate_unit_ai_board(defender)
+        defender_ai_location = game.ai_unit_on_board(defender)[0]
         for attacker_unit in game.player_units(attacker):
             distance = game.calculate_distance_units(defender_ai_location, attacker_unit[0])
             distance_to_defender_ai += (unit_weights[attacker_unit[1].type.value] * distance)
@@ -76,7 +88,7 @@ class MinimaxHandler:
                 if game.get(adjacent) is not None:
                     unit = game.get(adjacent)
                     if attacker_unit[1].player != unit.player:  # for now we only consider damage is can do on the defender
-                        inverse_damage_potential -= attacker_unit.damage_amount(unit)
+                        inverse_damage_potential -= attacker_unit[1].damage_amount(unit)
 
         # number of units engaged in combat
         # defender engaged will minus and attacker engaged will add to this value, therefore

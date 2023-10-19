@@ -895,34 +895,19 @@ class Game:
             print(f"Broker error: {error}")
         return None
     
-    # heuristic
-    def locate_unit_ai_board(self, player: Player) -> Coord:
-        """Iterates over all units belonging to a player and returns unit coords of unit_type"""
-        for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
-            unit = self.get(coord)
-            if unit is not None and unit.player == player and unit.type == UnitType.AI:
-                return coord
-    
+    # heuristic    
     def calculate_distance_units(self, unit1_coord : Coord, unit2_coord : Coord) -> int:
         """Uses the euclidean distance to calculate the distance between 2 units"""
         return math.sqrt((unit1_coord.row - unit2_coord.row) ** 2 + (unit1_coord.col - unit2_coord.col) ** 2)
-     
-    def player_ai_health(self, player: Player) -> int:
-        """Returns health of players AI unit."""
-        for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
-            unit = self.get(coord)
-            if unit is not None and unit.player == player and unit.type == UnitType.AI:
-                return unit.health
-
-    '''
-    def move_damage_potential(self, coords : CoordPair) -> int:
-        if self.is_valid_move(coords):
-            action_type = self.move_handler.ACTION.value
-            if (action_type == 1 or  action_type == 3):
-                # only attack and self_destruct results in damage
-
-            else: return 0
-    '''
+    
+    def ai_unit_on_board(self, player: Player) -> Tuple[Coord,Unit]:
+        """Iterates over all units belonging to a player and return AI unit info."""
+        for unit_info in self.player_units(player):
+            print(unit_info[1].type.value)
+            if unit_info[1].type.value == 0:
+                return (unit_info[0], unit_info[1])
+        print ("Couldnt find AI ?")
+        return None
 
 ##############################################################################################################
 
