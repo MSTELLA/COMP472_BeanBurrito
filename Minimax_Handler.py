@@ -1,11 +1,17 @@
 # AI handler with minimax alphabeta e0 e1 e2
 from GameTree import GameTree
-
+import time
 
 class MinimaxHandler:
     heuristic = ""
     game = None
     heuristic_counter = 0
+
+
+    def __init__(self):
+        self.run_time = None
+        self.current_best_move = None
+
 
     def set_heuristic(self, heuristic):
         self.heuristic = heuristic
@@ -105,7 +111,7 @@ class MinimaxHandler:
 
     # TODO implement a if else statement that calculates heuristic depending on heuristic chosen by user.
     def calculate_heuristic(self, node):
-        self.calculate_heuristic += 1
+        #self.calculate_heuristic += 1
 
         self.game = node.game
 
@@ -137,8 +143,7 @@ class MinimaxHandler:
             for child in node.children:
                 # we are recursively calling the minimax player where the maximizing player is now false
                 # At this depth it is the minimizing players turn (Attackers)
-                currentEval, currentMove = self.minimax(child, depth - 1, alpha_beta, alpha,
-                                           beta)
+                currentEval, currentMove = self.minimax(child, depth - 1, alpha_beta, alpha,beta)
 
                 # In suggest_move we are storing the returns in a two variable tuple, therefor need to store best move
                 if currentEval > maxEval:
@@ -169,6 +174,71 @@ class MinimaxHandler:
                     bestMove = child.get_attr("move") 
 
                 # if alpha beta is turned on
+                if alpha_beta:
+                    beta = min(beta, currentEval)  # Setting our new beta value (the smaller number out of the two)
+                    # For min if alpha is greater than or equal to beta, PRUNE!
+                    if beta <= alpha:
+                        break
+            # print("Best heuristic value: ", minEval, " and best move: ", str(bestMove))
+            return minEval, bestMove
+
+
+    def minimax_timed(self, node, depth, alpha_beta=False, alpha=-float('inf'), beta=float('inf'),time_limit=None):
+
+        # self.calculate_heuristic = 0 # Reset counter => No need?
+        print("Time limit is " + str(time_limit))
+        if not self.run_time:  # Initialize run_time on the first run
+            self.run_time = time.time()
+
+        if time.time() - self.run_time >= time_limit:
+            return None, self.current_best_move
+
+        if node.is_leaf:
+            e_node = self.calculate_heuristic(node)
+            # print("REACHED LEAF ", str(node.get_attr("move")), "at level ", str(node.depth), " with e(n): ", str(e_node))
+            # return self.calculate_heuristic(node), None
+            return e_node, node.get_attr("move")
+
+        # print("node is at level: " ,str(node.depth), " and is", node.get_attr("minimax"))
+
+        # Defender player logic
+        if node.get_attr("minimax") == "MAX":
+            maxEval = -float('inf')
+            bestMove = None
+            for child in node.children:
+                # we are recursively calling the minimax player where the maximizing player is now false
+                # At this depth it is the minimizing players turn (Attackers)
+                currentEval, currentMove = self.minimax(child, depth - 1, alpha_beta, alpha, beta)
+
+                # In suggest_move we are storing the returns in a two variable tuple, therefor need to store best move
+                if currentEval > maxEval:
+                    maxEval = currentEval
+                    bestMove = child.get_attr("move")  # best move is the move in the leaf...so should be child.
+                    self.current_best_move = bestMove
+                # if we turn on alpha beta pruning:
+                if alpha_beta:
+                    alpha = max(alpha, currentEval)  # Setting our new alpha value (the larger number out of the two)
+                    # If beta is greater than or equal to alpha, prune the rest of the branches!
+                    if beta <= alpha:
+                        break
+            # print("Best heuristic value: ", maxEval, " and best move: ", str(bestMove))
+            return maxEval, bestMove
+
+        # Attacker Player Logic
+        else:
+            minEval = float('inf')
+            bestMove = None
+
+            for child in node.children:
+                # we are recursively calling the minimax player where the maximizing player is now True
+                # At this depth it is the minimizing players turn (Attackers)
+                currentEval, currentMove = self.minimax(child, depth - 1, alpha_beta, alpha, beta)
+
+                if currentEval < minEval:
+                    minEval = currentEval
+                    bestMove = child.get_attr("move")
+                    self.current_best_move = bestMove
+                    # if alpha beta is turned on
                 if alpha_beta:
                     beta = min(beta, currentEval)  # Setting our new beta value (the smaller number out of the two)
                     # For min if alpha is greater than or equal to beta, PRUNE!

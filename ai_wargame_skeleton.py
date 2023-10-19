@@ -329,8 +329,8 @@ class Stats:
     score_current_action: float = 0.0
     elapsed_seconds_current_action: float = 0.0
     cumulative_evals: int = 0
-    cumulative_perc_evals_by_depth # TODO
-    average_branching_factor # TODO
+    #cumulative_perc_evals_by_depth # TODO
+    #average_branching_factor # TODO
 
 ##############################################################################################################
 
@@ -341,6 +341,7 @@ class Game:
     next_player: Player = Player.Attacker
     players: Tuple[Player] = (Player.Defender, Player.Attacker)
     turns_played : int = 0
+    #timeLimit: Options = Options.max_time
     options: Options = field(default_factory=Options)
     stats: Stats = field(default_factory=Stats)
     _attacker_has_ai : bool = True
@@ -822,7 +823,7 @@ class Game:
         # Suggest Random move according to the minimax function
         print("About to call minimax...")
         (score, best_move) = (
-            self.minimax_handler.minimax(game_tree.root,depth,self.options.alpha_beta,alpha,beta))
+            self.minimax_handler.minimax_timed(game_tree.root,depth,self.options.alpha_beta,alpha,beta,self.options.max_time))
             # self.minimax_handler.minimax(game_tree.root,depth,True,True,alpha,beta))
         print(f"Minimax returned with score: {score} and best_move: {best_move}")
 
