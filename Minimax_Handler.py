@@ -30,12 +30,12 @@ class MinimaxHandler:
         elif (attacker_ai == None): return 1000 # DEFENDER WINS
 
         potential = 0
-        if game.next_player == attacker:
+        if game.next_player == attacker: # attacker minimize , current player
             for attacker_unit in game.player_units(attacker):
                 for adjacent in attacker_unit[0].iter_adjacent():
                     if game.get(adjacent) is not None:
                         unit = game.get(adjacent)
-                        if attacker_unit[1].player != unit.player: 
+                        if attacker_unit[1].player.value != unit.player.value: 
                             # if they do damage to opponenent AI this is good !
                             if unit.unit_name == "AI": potential -= 10 * (2)
                             else: potential -= 2 # else its oki
@@ -43,12 +43,12 @@ class MinimaxHandler:
                             # if they do damage to opponenent AI this is bad !
                             if unit.unit_name == "AI": potential += 10 * (2)
                             else: potential += 2 # else its oki
-        else:
+        else: # defender minimize
             for defender_unit in game.player_units(defender):
                 for adjacent in defender_unit[0].iter_adjacent():
                     if game.get(adjacent) is not None:
                         unit = game.get(adjacent)
-                        if defender_unit[1].player != unit.player: 
+                        if defender_unit[1].player.value != unit.player.value: 
                             # if they do damage to opponenent AI this is good !
                             if unit.unit_name == "AI": potential += 10 * (2)
                             else: potential += 2 # else its oki
@@ -95,7 +95,8 @@ class MinimaxHandler:
         if (defender_ai == None): return -1000 # ATTACKER WINS
         elif (attacker_ai == None): return 1000 # DEFENDER WINS
 
-        return (game.ai_unit_on_board(defender)[1].health - game.ai_unit_on_board(attacker)[1].health) + self.self_destruct_potential(game, defender, attacker)
+        potentional_self_destruct = self.self_destruct_potential(game, defender, attacker)
+        return (game.ai_unit_on_board(defender)[1].health - game.ai_unit_on_board(attacker)[1].health) - potentional_self_destruct
 
 
     # heuristic e2
@@ -159,8 +160,8 @@ class MinimaxHandler:
                             # they are engaged in combat
                             number_units_engaged_in_combat -= 1
 
-        # TODO : maybe we can add weights to these ?
-        return ai_health_dif + distance_to_defender_ai + inverse_damage_potential + number_units_engaged_in_combat + self.self_destruct_potential(game, defender, attacker)
+        potentional_self_destruct = self.self_destruct_potential(game, defender, attacker)
+        return ai_health_dif - distance_to_defender_ai + inverse_damage_potential - number_units_engaged_in_combat - potentional_self_destruct
 
 
     # TODO implement a if else statement that calculates heuristic depending on heuristic chosen by user.
@@ -256,7 +257,7 @@ class MinimaxHandler:
             return maxEval, bestMove
 
         # Attacker Player Logic
-        else:
+        if node.get_attr("minimax") == "MIN":
             minEval = float('inf')
             bestMove = None
 
