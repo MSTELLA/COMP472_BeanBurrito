@@ -168,7 +168,6 @@ class Coord:
     """Representation of a game cell coordinate (row, col)."""
     row : int = 0
     col : int = 0
-    
 
     def col_string(self) -> str:
         """Text representation of this Coord's column."""
@@ -274,8 +273,6 @@ class CoordPair:
             self.directionality=-1
         return self.directionality
 
-
-
     @classmethod
     def from_quad(cls, row0: int, col0: int, row1: int, col1: int) -> CoordPair:
         """Create a CoordPair from 4 integers."""
@@ -301,7 +298,6 @@ class CoordPair:
             return coords
         else:
             return None
-    
 
 ##############################################################################################################
 
@@ -317,7 +313,7 @@ class Options:
     heuristic : str | None ="e0"
     max_turns : int | None = 100
     randomize_moves : bool = True
-    broker : str | None = None # What is this for?
+    broker : str | None = None
 
 ##############################################################################################################
 
@@ -329,7 +325,7 @@ class Stats:
     score_current_action: float = 0.0
     elapsed_seconds_current_action: float = 0.0
     cumulative_evals: int = 0
-    #average_branching_factor # TODO
+    average_branching_factor: float = 0.0
 
 ##############################################################################################################
 
@@ -349,12 +345,6 @@ class Game:
     output_handler=OutputHandler()
     minimax_handler = MinimaxHandler()
 
-    '''
-    def __init__(self):
-        self.minimax_handler = MinimaxHandler()
-        self.move_handler = MoveHandler()
-        self.output_handler = OutputHandler()
-    '''
 
     def __post_init__(self):
         """Automatically called after class init to set up the default board state."""
@@ -449,7 +439,6 @@ class Game:
         # DETERMINE TYPE OF ACTION
         self.move_handler.action_type(src_unit,dst_unit,coords) # sets action type
         action_type= self.move_handler.ACTION.value # 0: Movement 1: Attack 2: Repair 3: Self-Destruct
-        # print("STEPS: Action determined to be #",action_type)
 
         # VALIDATE SELFDESTRUCT
         if action_type==3:
@@ -625,7 +614,6 @@ class Game:
     def next_turn(self):
         """Transitions game to the next turn."""
         self.next_player = self.next_player.next()
-        # self.next_player_opp = self.next_player_opp.next()
         self.turns_played += 1
 
     def to_string(self) -> str:
@@ -634,7 +622,6 @@ class Game:
         output = ""
         output += f"Next player: {self.next_player.name}\n"
         output += f"Turns played: {self.turns_played}\n"
-        # TODO : ADD AI STATS
         coord = Coord()
         output += "\n   "
         for col in range(dim):
@@ -801,7 +788,6 @@ class Game:
             return (0, None, 0)
 
     def suggest_move(self) -> CoordPair | None:
-        # print("Entering suggest_move...")
         """Suggest the next move using minimax alpha beta."""
         start_time = datetime.now() # Start time
         # (score, move, avg_depth) = self.random_move()
@@ -814,11 +800,8 @@ class Game:
         # Suggest Random move according to the minimax function
         print("About to call minimax...")
         self.minimax_handler.set_gametree_root(self.clone()) # uses copy of the game to create a GameTree 
-        # print("in suggest move, time limit", self.options.max_time)
         (score, best_move) = (
             self.minimax_handler.iter_deep_minimax(depth,self.options.alpha_beta,self.options.max_time))
-            # self.minimax_handler.minimax(game_tree.root,depth,True,True,alpha,beta))
-        # print_tree(self.minimax_handler.current_Tree.root,attr_list=["minimax", "move"])
 
         elapsed_seconds = (datetime.now() - start_time).total_seconds() # End time
         
@@ -831,16 +814,8 @@ class Game:
         print(f"Heuristic score: {score}")
         print(f"Elapsed time: {elapsed_seconds:0.1f}s\n")
         
-        # if len(self.stats.evaluations_per_depth.keys()) ==0:
-        self.stats.evaluations_per_depth = self.minimax_handler.evaluations_per_depth
-        # else:
-        #     for k in self.minimax_handler.evaluations_per_depth.keys():
-        #         if k in self.stats.evaluations_per_depth.keys():
-        #             self.stats.evaluations_per_depth[k] += self.minimax_handler.evaluations_per_depth[k]
-        #         else:
-        #             self.stats.evaluations_per_depth[k] = self.minimax_handler.evaluations_per_depth[k]
-
         print("Game cumulative information:")
+        self.stats.evaluations_per_depth = self.minimax_handler.evaluations_per_depth
         total_evals = sum(self.stats.evaluations_per_depth.values())
         print(f"Evals: {total_evals}")
         
@@ -854,13 +829,13 @@ class Game:
             print(f"{k}:{round((self.stats.evaluations_per_depth[k]/total_evals*100),1)} ",end='')
         print()
 
-        print(f"Average branching factor: TODO")
-
+        self.minimax_handler.generate_branching_factor_info()
+        self.stats.average_branching_factor = sum(self.minimax_handler.branching_factor_info)/len(self.minimax_handler.branching_factor_info)
+        print(f"Average branching factor: ", str(round(self.stats.average_branching_factor,2)))
+        
         if self.stats.total_seconds > 0:
             print(f"Eval perf.: {total_evals/self.stats.total_seconds/1000:0.1f}k/s\n")
-        
-        
-        # print(f"Exiting suggest_move with move: {best_move}")
+
         return best_move
 
     def post_move_to_broker(self, move: CoordPair):

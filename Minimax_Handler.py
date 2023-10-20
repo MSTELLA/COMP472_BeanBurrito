@@ -11,6 +11,7 @@ class MinimaxHandler:
     current_Tree = None
     time_limit = None
     start_time = None
+    branching_factor_info = []
 
     def set_gametree_root(self, current_game):
         """ creates GameTree having the current game as its root. Used for iterative level creation and traversal."""
@@ -277,4 +278,7 @@ class MinimaxHandler:
 
             return minEval, bestMove
 
-
+    def generate_branching_factor_info(self):
+        non_leaves_nodes = [node for node in list(self.current_Tree.root.descendants) if node.is_leaf == False]
+        for node in non_leaves_nodes:
+            self.branching_factor_info.append(len(list((node.children))))
