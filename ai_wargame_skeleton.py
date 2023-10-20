@@ -809,7 +809,7 @@ class Game:
         # Initializing alpha, beta and depth for the minimax algorithm.
         alpha = -float('inf')
         beta = float('inf')
-        depth = 20
+        depth = 30
 
         # Suggest Random move according to the minimax function
         print("About to call minimax...")
@@ -831,14 +831,14 @@ class Game:
         print(f"Heuristic score: {score}")
         print(f"Elapsed time: {elapsed_seconds:0.1f}s\n")
         
-        if len(self.stats.evaluations_per_depth.keys()) ==0:
-            self.stats.evaluations_per_depth = self.minimax_handler.evaluations_per_depth
-        else:
-            for k in sorted(self.minimax_handler.evaluations_per_depth.keys()):
-                if k in self.stats.evaluations_per_depth.keys():
-                    self.stats.evaluations_per_depth[k] += self.minimax_handler.evaluations_per_depth[k]
-                else:
-                    self.stats.evaluations_per_depth[k] = self.minimax_handler.evaluations_per_depth[k]
+        # if len(self.stats.evaluations_per_depth.keys()) ==0:
+        self.stats.evaluations_per_depth = self.minimax_handler.evaluations_per_depth
+        # else:
+        #     for k in self.minimax_handler.evaluations_per_depth.keys():
+        #         if k in self.stats.evaluations_per_depth.keys():
+        #             self.stats.evaluations_per_depth[k] += self.minimax_handler.evaluations_per_depth[k]
+        #         else:
+        #             self.stats.evaluations_per_depth[k] = self.minimax_handler.evaluations_per_depth[k]
 
         print("Game cumulative information:")
         total_evals = sum(self.stats.evaluations_per_depth.values())
@@ -920,8 +920,10 @@ class Game:
     def ai_unit_on_board(self, player: Player) -> Tuple[Coord,Unit]:
         """Iterates over all units belonging to a player and return AI unit info."""
         for unit_info in self.player_units(player):
+            print(unit_info[1].type.value)
             if unit_info[1].type.value == 0:
                 return (unit_info[0], unit_info[1])
+        # print ("Couldnt find AI ?")
         return None
 
 ##############################################################################################################
