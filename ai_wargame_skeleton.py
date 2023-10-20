@@ -809,7 +809,7 @@ class Game:
         # Initializing alpha, beta and depth for the minimax algorithm.
         alpha = -float('inf')
         beta = float('inf')
-        depth = 30
+        depth = 20
 
         # Suggest Random move according to the minimax function
         print("About to call minimax...")

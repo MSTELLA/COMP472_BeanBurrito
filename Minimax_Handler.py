@@ -205,7 +205,10 @@ class MinimaxHandler:
             for leaf in current_leaves:
                 self.current_Tree.expand_one_node(leaf)
                 elapsed_seconds = (datetime.now() - self.start_time).total_seconds()
-                if elapsed_seconds >= self.time_limit-0.3:
+                if alpha_beta and elapsed_seconds >= self.time_limit- self.time_limit/5:
+                    # print("OUT OF TIME while creating a node - ", str(elapsed_seconds) )
+                    break
+                if not alpha_beta and elapsed_seconds >= self.time_limit- (self.time_limit*2)/5:
                     # print("OUT OF TIME while creating a node - ", str(elapsed_seconds) )
                     break
 
