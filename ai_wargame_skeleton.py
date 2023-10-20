@@ -746,13 +746,20 @@ class Game:
         if self.options.max_turns is not None and self.turns_played >= self.options.max_turns:
             print(f"Game has reached the max number of turns with no winner. \n")
             return Player.Defender
-        elif self._attacker_has_ai:
+        if self._attacker_has_ai:
             if self._defender_has_ai:
                 return None
             else:
                 return Player.Attacker    
-        elif self._defender_has_ai:
-            return Player.Defender
+        return Player.Defender            
+        #     return Player.Defender
+        # elif self._attacker_has_ai:
+        #     if self._defender_has_ai:
+        #         return None
+        #     else:
+        #         return Player.Attacker    
+        # elif self._defender_has_ai:
+        #     return Player.Defender
     
     def has_winner_internal(self) -> Player | None:
         """Check if the game is over and returns winner, INTERAL = No printing statements"""
