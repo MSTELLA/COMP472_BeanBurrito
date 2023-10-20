@@ -187,7 +187,7 @@ class MinimaxHandler:
             # if time_limit and time.time() - start_time >= time_limit:
             elapsed_seconds = (datetime.now() - self.start_time).total_seconds()
             # print("iterative with depth :", str(depth) , " TIME - ", str(elapsed_seconds) )
-            if elapsed_seconds >= self.time_limit-1:
+            if elapsed_seconds >= self.time_limit-0.5:
                 # print("OUT OF TIME - ", str(elapsed_seconds) )
                 return best_val, best_move
 
