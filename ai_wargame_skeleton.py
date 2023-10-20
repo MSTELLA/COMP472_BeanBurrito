@@ -904,7 +904,6 @@ class Game:
     def ai_unit_on_board(self, player: Player) -> Tuple[Coord,Unit]:
         """Iterates over all units belonging to a player and return AI unit info."""
         for unit_info in self.player_units(player):
-            print(unit_info[1].type.value)
             if unit_info[1].type.value == 0:
                 return (unit_info[0], unit_info[1])
         print ("Couldnt find AI ?")
