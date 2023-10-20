@@ -183,7 +183,7 @@ class MinimaxHandler:
     def iter_deep_minimax(self, max_depth, alpha_beta = False, time_limit=None):
         best_val = None
         best_move = None
-        self.evaluations_per_depth = {}
+        # self.evaluations_per_depth = {}
         # print(" score ", str(best_val), " & move ", str(best_move), " at depth of search ", "start of iter_deep_max - should be None")
 
         if time_limit:
