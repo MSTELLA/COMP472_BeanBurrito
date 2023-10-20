@@ -23,7 +23,6 @@ class GameTree:
         return self.root
     
     def expand_one_node(self, parent_node):
-        # CHECK IF GAME IS NOT OVER (also checks max turns)
         if parent_node.game.has_winner_internal():
             return None
 

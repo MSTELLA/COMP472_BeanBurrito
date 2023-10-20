@@ -165,7 +165,7 @@ class MoveHandler:
 
     # Method that will be used to generate a string describing the repair (wil be used by output handler)
     def repair_string(self, src_unit, src_coord, dst_coord, repair_value):
-        self.action_consequence = "Repair Action Performed." + src_unit.type.name + " Unit at " + src_unit.to_string() + "repaired" + dst_coord.to_string() + "by" + str(repair_value) + "points"
+        self.action_consequence = "Repair Action Performed. " + src_unit.type.name + " Unit at " + src_coord.to_string() + " repaired " + dst_coord.to_string() + " by " + str(repair_value) + " points"
 
     def repair(self, board, src_unit, src_coordinates, dst_coordinates):
         # Setting the target goal

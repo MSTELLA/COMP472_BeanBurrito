@@ -7,15 +7,18 @@ from bigtree import Node, print_tree
 class MinimaxHandler:
     heuristic = ""
     game = None
-    heuristic_counter = 0
+    evaluations_per_depth = {}
     current_Tree = None
     time_limit = None
     start_time = None
 
     def set_gametree_root(self, current_game):
+        """ creates GameTree having the current game as its root. Used for iterative level creation and traversal."""
         self.current_Tree = GameTree(current_game)
+        self.heuristic_counter_per_level = 0
 
     def set_heuristic(self, heuristic):
+        """ Used to set the heuristic input by the player during the setup of the game"""
         self.heuristic = heuristic
 
     def self_destruct_potential(self, game, defender, attacker) -> int:
@@ -161,8 +164,12 @@ class MinimaxHandler:
 
     # TODO implement a if else statement that calculates heuristic depending on heuristic chosen by user.
     def calculate_heuristic(self, node):
-        #self.calculate_heuristic += 1
         self.game = node.game
+        node_level = node.depth-1
+        if node_level in self.evaluations_per_depth.keys():
+            self.evaluations_per_depth[node_level] = self.evaluations_per_depth[node_level] + 1 
+        else:
+            self.evaluations_per_depth[node_level] = 1
 
         if self.heuristic == "e0":
             return self.e0(node.game, self.game.players[0], self.game.players[1])
@@ -176,6 +183,7 @@ class MinimaxHandler:
     def iter_deep_minimax(self, max_depth, alpha_beta = False, time_limit=None):
         best_val = None
         best_move = None
+        self.evaluations_per_depth = {}
         # print(" score ", str(best_val), " & move ", str(best_move), " at depth of search ", "start of iter_deep_max - should be None")
 
         if time_limit:
@@ -212,8 +220,6 @@ class MinimaxHandler:
 
     # method minimax with alphabeta option
     def minimax(self, node, depth, alpha_beta=False, alpha=-float('inf'), beta=float('inf')):
-        # if node.is_root:
-        #     self.calculate_heuristic = 0 # Reset counter => No need?
 
         if node.is_leaf:
             e_node = self.calculate_heuristic(node)

@@ -329,7 +329,6 @@ class Stats:
     score_current_action: float = 0.0
     elapsed_seconds_current_action: float = 0.0
     cumulative_evals: int = 0
-    #cumulative_perc_evals_by_depth # TODO
     #average_branching_factor # TODO
 
 ##############################################################################################################
@@ -729,11 +728,11 @@ class Game:
                 else:
                     print("The move is not valid! Try again.")
 
-    def computer_turn(self) -> CoordPair | None: # TODO TO INSPECT
+    def computer_turn(self) -> CoordPair | None:
         """Computer plays a move."""
         print("About to call suggest_move from computer_turn...")
         mv = self.suggest_move()
-        print(f"suggest_move returned move: {mv} in computer_turn")
+        # print(f"suggest_move returned move: {mv} in computer_turn")
         if mv is not None:
             print(f"Attempting to perform move: {mv}")
             (success,result) = self.perform_move(mv) # validates and performs
@@ -802,16 +801,10 @@ class Game:
             return (0, None, 0)
 
     def suggest_move(self) -> CoordPair | None:
-        print("Entering suggest_move...\n")
+        # print("Entering suggest_move...")
         """Suggest the next move using minimax alpha beta."""
         start_time = datetime.now() # Start time
         # (score, move, avg_depth) = self.random_move()
-        # Initializing the game tree
-        # game_tree = GameTree(self.clone(),3) # TODO THE DEPTH IS HARDCODED, need to make it vary depending on the time alloted by user
-        # print("GameTree initialized.")
-        # game_tree.expand_tree_max_levels()
-        # TODO: RETURN BRANCHING FACTOR
-        # print("GameTree expanded")
 
         # Initializing alpha, beta and depth for the minimax algorithm.
         alpha = -float('inf')
@@ -826,25 +819,48 @@ class Game:
             self.minimax_handler.iter_deep_minimax(depth,self.options.alpha_beta,self.options.max_time))
             # self.minimax_handler.minimax(game_tree.root,depth,True,True,alpha,beta))
         # print_tree(self.minimax_handler.current_Tree.root,attr_list=["minimax", "move"])
+
         elapsed_seconds = (datetime.now() - start_time).total_seconds() # End time
         
         print(f"Minimax returned with score: {score} and best_move: {best_move}")
 
         # Below is generating statistics and printing them
-        self.stats.cumulative_evals = self.minimax_handler.heuristic_counter
         self.stats.elapsed_seconds_current_action = elapsed_seconds
         self.stats.score_current_action = score
         self.stats.total_seconds += elapsed_seconds
         print(f"Heuristic score: {score}")
+        print(f"Elapsed time: {elapsed_seconds:0.1f}s\n")
+        
+        if len(self.stats.evaluations_per_depth.keys()) ==0:
+            self.stats.evaluations_per_depth = self.minimax_handler.evaluations_per_depth
+        else:
+            for k in sorted(self.minimax_handler.evaluations_per_depth.keys()):
+                if k in self.stats.evaluations_per_depth.keys():
+                    self.stats.evaluations_per_depth[k] += self.minimax_handler.evaluations_per_depth[k]
+                else:
+                    self.stats.evaluations_per_depth[k] = self.minimax_handler.evaluations_per_depth[k]
+
+        print("Game cumulative information:")
+        total_evals = sum(self.stats.evaluations_per_depth.values())
+        print(f"Evals: {total_evals}")
+        
         print(f"Evals per depth: ",end='')
         for k in sorted(self.stats.evaluations_per_depth.keys()):
             print(f"{k}:{self.stats.evaluations_per_depth[k]} ",end='')
         print()
-        total_evals = sum(self.stats.evaluations_per_depth.values())
+
+        print(f"Evals per depth %: ",end='')
+        for k in sorted(self.stats.evaluations_per_depth.keys()):
+            print(f"{k}:{round((self.stats.evaluations_per_depth[k]/total_evals*100),1)} ",end='')
+        print()
+
+        print(f"Average branching factor: TODO")
+
         if self.stats.total_seconds > 0:
-            print(f"Eval perf.: {total_evals/self.stats.total_seconds/1000:0.1f}k/s")
-        print(f"Elapsed time: {elapsed_seconds:0.1f}s")
-        print(f"Exiting suggest_move with move: {best_move}")
+            print(f"Eval perf.: {total_evals/self.stats.total_seconds/1000:0.1f}k/s\n")
+        
+        
+        # print(f"Exiting suggest_move with move: {best_move}")
         return best_move
 
     def post_move_to_broker(self, move: CoordPair):
