@@ -906,7 +906,6 @@ class Game:
         for unit_info in self.player_units(player):
             if unit_info[1].type.value == 0:
                 return (unit_info[0], unit_info[1])
-        print ("Couldnt find AI ?")
         return None
 
 ##############################################################################################################
