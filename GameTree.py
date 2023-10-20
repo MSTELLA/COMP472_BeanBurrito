@@ -4,16 +4,15 @@ from bigtree import Node, print_tree
 class GameTree:
     time_info=None
 
-    def __init__(self, current_game, max_search_depth = 2):
+    def __init__(self, current_game):
         current_player_minimax = "MIN" if current_game.next_player.value == 0 else "MAX" # We maximize for defender (1), minimize for attacker (0)
         self.root = Node("current_game", game=current_game, minimax = current_player_minimax)
-        self.max_search_depth = max_search_depth
-        # self.backup = current_game.complete_clone() #backup game to set at the end
+        # self.max_search_depth = max_search_depth
 
-    def expand_tree_max_levels(self):
-        for i in range(self.max_search_depth):
-            # print("TEST TREE: working on LEVEL ", str(i))
-            self.expand_tree_1_level()
+    # def expand_tree_max_levels(self):
+    #     for i in range(self.max_search_depth):
+    #         # print("TEST TREE: working on LEVEL ", str(i))
+    #         self.expand_tree_1_level()
 
     def expand_tree_1_level(self):
         # iterate through each leaf or better nodes from a specific level and apply expand_one_node to them
@@ -21,6 +20,7 @@ class GameTree:
         for leaf in current_leaves:
             self.expand_one_node(leaf)
             # print_tree(self.root)
+        return self.root
     
     def expand_one_node(self, parent_node):
         # CHECK IF GAME IS NOT OVER (also checks max turns)

@@ -20,7 +20,7 @@ import math
 from MoveHandler import MoveHandler
 from OutputHandler import OutputHandler
 from Minimax_Handler import MinimaxHandler
-from GameTree import GameTree
+# from GameTree import GameTree
 from bigtree import Node, print_tree
 
 # maximum and minimum values for our heuristic scores (usually represents an end of game condition)
@@ -806,14 +806,12 @@ class Game:
         """Suggest the next move using minimax alpha beta."""
         start_time = datetime.now() # Start time
         # (score, move, avg_depth) = self.random_move()
-
         # Initializing the game tree
-        game_tree = GameTree(self.clone(),3) # TODO THE DEPTH IS HARDCODED, need to make it vary depending on the time alloted by user
-        print("GameTree initialized.")
-        game_tree.expand_tree_max_levels()
+        # game_tree = GameTree(self.clone(),3) # TODO THE DEPTH IS HARDCODED, need to make it vary depending on the time alloted by user
+        # print("GameTree initialized.")
+        # game_tree.expand_tree_max_levels()
         # TODO: RETURN BRANCHING FACTOR
-        print("GameTree expanded")
-        # print_tree(game_tree.root,attr_list=["minimax", "move"])
+        # print("GameTree expanded")
 
         # Initializing alpha, beta and depth for the minimax algorithm.
         alpha = -float('inf')
@@ -822,12 +820,15 @@ class Game:
 
         # Suggest Random move according to the minimax function
         print("About to call minimax...")
+        self.minimax_handler.set_gametree_root(self.clone()) # uses copy of the game to create a GameTree 
+        # print("in suggest move, time limit", self.options.max_time)
         (score, best_move) = (
-            self.minimax_handler.iter_deep_minimax(game_tree.root,depth,self.options.alpha_beta,self.options.max_time))
+            self.minimax_handler.iter_deep_minimax(depth,self.options.alpha_beta,self.options.max_time))
             # self.minimax_handler.minimax(game_tree.root,depth,True,True,alpha,beta))
-        print(f"Minimax returned with score: {score} and best_move: {best_move}")
-
+        # print_tree(self.minimax_handler.current_Tree.root,attr_list=["minimax", "move"])
         elapsed_seconds = (datetime.now() - start_time).total_seconds() # End time
+        
+        print(f"Minimax returned with score: {score} and best_move: {best_move}")
 
         # Below is generating statistics and printing them
         self.stats.cumulative_evals = self.minimax_handler.heuristic_counter
