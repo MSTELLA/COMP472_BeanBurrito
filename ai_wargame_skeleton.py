@@ -802,14 +802,13 @@ class Game:
         # Initializing alpha, beta and depth for the minimax algorithm.
         alpha = -float('inf')
         beta = float('inf')
-        depth = 30
+
 
         # Suggest Random move according to the minimax function
         print("About to call minimax...")
         self.minimax_handler.set_gametree_root(self.clone()) # uses copy of the game to create a GameTree 
         (score, best_move) = (
-            self.minimax_handler.iter_deep_minimax(depth,self.options.alpha_beta,self.options.max_time))
-
+            self.minimax_handler.iter_deep_minimax(30,self.options.max_turns, self.turns_played ,self.options.alpha_beta,self.options.max_time))
         elapsed_seconds = (datetime.now() - start_time).total_seconds() # End time
         
         print(f"Minimax returned with score: {score} and best_move: {best_move}")

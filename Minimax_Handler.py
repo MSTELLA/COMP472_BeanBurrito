@@ -11,7 +11,10 @@ class MinimaxHandler:
     current_Tree = None
     time_limit = None
     start_time = None
+    minimax_start_time = None
     branching_factor_info = []
+    totalTurns = None
+    turnsPlayed = None
 
     def set_gametree_root(self, current_game):
         """ creates GameTree having the current game as its root. Used for iterative level creation and traversal."""
@@ -180,17 +183,38 @@ class MinimaxHandler:
         elif self.heuristic =="e2":
             return self.e2(node.game, self.game.players[0], self.game.players[1])
 
-    # Implement iterative deepening for our minimax
+    # Enables us to implement shallow depth at the starting of the game and gradually increase depth as game progresses
+    def choose_depth(self,totalTurns,turnsPlayed,alpha_beta, time_limit):
+        turnsRemaining = totalTurns - turnsPlayed
+        base_depth = 3
 
-    def iter_deep_minimax(self, max_depth, alpha_beta = False, time_limit=None):
+        if alpha_beta:
+            base_depth += 1
+            base_depth += int(time_limit//10)
+        else:
+            base_depth += int(time_limit//14)
+        if turnsPlayed <= 10:
+            return base_depth
+        elif turnsRemaining <= 30:
+            return turnsRemaining//2
+        elif not alpha_beta and time_limit >= 10:
+            return base_depth + (turnsPlayed//12)
+        else:
+            return base_depth + (turnsPlayed//6)
+
+
+    # Implement iterative deepening for our minimax
+    def iter_deep_minimax(self, max_depth ,totalTurns, turnsPlayed, alpha_beta = False, time_limit=None):
         best_val = None
         best_move = None
+
         # self.evaluations_per_depth = {}
         # print(" score ", str(best_val), " & move ", str(best_move), " at depth of search ", "start of iter_deep_max - should be None")
 
         if time_limit:
             self.time_limit = time_limit
             self.start_time = datetime.now()
+        #max_depth = self.choose_depth(totalTurns, turnsPlayed, alpha_beta,time_limit)
 
         for depth in range(1, max_depth+1):
             
@@ -213,9 +237,8 @@ class MinimaxHandler:
                 if not alpha_beta and elapsed_seconds >= self.time_limit- (self.time_limit*2)/5:
                     # print("OUT OF TIME while creating a node - ", str(elapsed_seconds) )
                     break
-
-
-            current_val, current_move = self.minimax(self.current_Tree.root,depth,alpha_beta)  # note default alpha beta is used
+            timeRemaining = self.time_limit - elapsed_seconds
+            current_val, current_move = self.minimax(self.current_Tree.root,depth,alpha_beta,timeRemaining)  # note default alpha beta is used
             # print(" score ", str(current_val), " & move ", current_move, " at depth of search ", str(depth))
             if current_val is not None:
                 best_val, best_move = current_val, current_move
@@ -224,23 +247,33 @@ class MinimaxHandler:
         return best_val, best_move
 
     # method minimax with alphabeta option
-    def minimax(self, node, depth, alpha_beta=False, alpha=-float('inf'), beta=float('inf')):
+    def minimax(self, node, depth, alpha_beta=False,timeRemaining=None, alpha=-float('inf'), beta=float('inf')):
+
+        if self.minimax_start_time is None:
+            self.minimax_start_time = datetime.now()
 
         if node.is_leaf:
             e_node = self.calculate_heuristic(node)
             # print("REACHED LEAF ", str(node.get_attr("move")), "at level ", str(node.depth), " with e(n): ", str(e_node))
             return e_node, node.get_attr("move")
 
+        if timeRemaining - 3 < (datetime.now() - self.minimax_start_time).total_seconds() and not node.root:
+            e_node = self.calculate_heuristic(node)
+            print("HELOOOOOOOOOOOOOOOOOOOOOO \n\n\n\n\n\n\n\n\n")
+            return e_node, node.get_attr("move")
+
+
 
         # Defender player logic
         if node.get_attr("minimax") == "MAX":
             maxEval = -float('inf')
             bestMove = None
-            
+
             for child in node.children:
+
                 # we are recursively calling the minimax player where the maximizing player is now false
                 # At this depth it is the minimizing players turn (Attackers)
-                currentEval, currentMove = self.minimax(child, depth - 1, alpha_beta, alpha,beta)
+                currentEval, currentMove = self.minimax(child, depth - 1, alpha_beta, timeRemaining, alpha,beta)
 
                 # In suggest_move we are storing the returns in a two variable tuple, therefor need to store best move
                 if currentEval > maxEval:
@@ -264,7 +297,8 @@ class MinimaxHandler:
             for child in node.children:
                 # we are recursively calling the minimax player where the maximizing player is now True
                 # At this depth it is the minimizing players turn (Attackers)
-                currentEval, currentMove = self.minimax(child, depth - 1, alpha_beta, alpha, beta)
+
+                currentEval, currentMove = self.minimax(child, depth - 1, alpha_beta, timeRemaining, alpha, beta)
 
                 if currentEval < minEval:
                     minEval = currentEval
