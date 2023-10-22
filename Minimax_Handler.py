@@ -257,9 +257,8 @@ class MinimaxHandler:
             # print("REACHED LEAF ", str(node.get_attr("move")), "at level ", str(node.depth), " with e(n): ", str(e_node))
             return e_node, node.get_attr("move")
 
-        if timeRemaining - 3 < (datetime.now() - self.minimax_start_time).total_seconds() and not node.root:
+        if timeRemaining - 3 < (datetime.now() - self.minimax_start_time).total_seconds() and not node.is_root:
             e_node = self.calculate_heuristic(node)
-            print("HELOOOOOOOOOOOOOOOOOOOOOO \n\n\n\n\n\n\n\n\n")
             return e_node, node.get_attr("move")
 
 
