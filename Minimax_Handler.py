@@ -15,6 +15,7 @@ class MinimaxHandler:
     branching_factor_info = []
     totalTurns = None
     turnsPlayed = None
+    tree_fully_traversed = True
 
     def set_gametree_root(self, current_game):
         """ creates GameTree having the current game as its root. Used for iterative level creation and traversal."""
@@ -229,15 +230,20 @@ class MinimaxHandler:
         # iterate through each leaf or better nodes from a specific level and apply expand_one_node to them
             current_leaves = list(self.current_Tree.root.leaves)
             for leaf in current_leaves:
-                self.current_Tree.expand_one_node(leaf)
-                elapsed_seconds = (datetime.now() - self.start_time).total_seconds()
-                if alpha_beta and elapsed_seconds >= self.time_limit- self.time_limit/5:
-                    # print("OUT OF TIME while creating a node - ", str(elapsed_seconds) )
-                    break
-                if not alpha_beta and elapsed_seconds >= self.time_limit- (self.time_limit*2)/5:
-                    # print("OUT OF TIME while creating a node - ", str(elapsed_seconds) )
-                    break
-            timeRemaining = self.time_limit - elapsed_seconds
+                if self.tree_fully_traversed:
+                    self.current_Tree.expand_one_node(leaf)
+                    elapsed_seconds = (datetime.now() - self.start_time).total_seconds()
+                    #print(f"Elapsed seconds {elapsed_seconds}")
+                    if alpha_beta and (elapsed_seconds >= (self.time_limit - self.time_limit//5)):
+                        # print("OUT OF TIME while creating a node - ", str(elapsed_seconds) )
+                        break
+                    if not alpha_beta and (elapsed_seconds >= (self.time_limit - (self.time_limit*2)//5)):
+                        #print(f"Elapsesd seconds inside {elapsed_seconds}")
+                        # print("OUT OF TIME while creating a node - ", str(elapsed_seconds) )
+                        break
+
+            timeRemaining = self.time_limit - (datetime.now() - self.start_time).total_seconds()
+            print(timeRemaining)
             current_val, current_move = self.minimax(self.current_Tree.root,depth,alpha_beta,timeRemaining)  # note default alpha beta is used
             # print(" score ", str(current_val), " & move ", current_move, " at depth of search ", str(depth))
             if current_val is not None:
@@ -248,16 +254,18 @@ class MinimaxHandler:
 
     # method minimax with alphabeta option
     def minimax(self, node, depth, alpha_beta=False,timeRemaining=None, alpha=-float('inf'), beta=float('inf')):
-
+        #print(f"Time remaing {timeRemaining}")
         if self.minimax_start_time is None:
             self.minimax_start_time = datetime.now()
 
         if node.is_leaf:
             e_node = self.calculate_heuristic(node)
             # print("REACHED LEAF ", str(node.get_attr("move")), "at level ", str(node.depth), " with e(n): ", str(e_node))
+            self.tree_fully_traversed = True
             return e_node, node.get_attr("move")
 
         if timeRemaining - 3 < (datetime.now() - self.minimax_start_time).total_seconds() and not node.is_root:
+            self.tree_fully_traversed = False
             e_node = self.calculate_heuristic(node)
             return e_node, node.get_attr("move")
 
