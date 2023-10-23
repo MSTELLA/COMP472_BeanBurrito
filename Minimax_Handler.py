@@ -88,6 +88,7 @@ class MinimaxHandler:
     - AI health difference (attacker wants to minimize defender AI health) (defender wants to maximize defender AI health)
     '''
     def e1(self, game, defender, attacker) -> int:
+        self.game = game
         # defender is trying to maximize this number, and attacker is trying to minimize this number 
         defender_ai = game.ai_unit_on_board(defender)
         attacker_ai = game.ai_unit_on_board(attacker)
@@ -95,8 +96,26 @@ class MinimaxHandler:
         if (defender_ai == None): return -1000 # ATTACKER WINS
         elif (attacker_ai == None): return 1000 # DEFENDER WINS
 
+        unit_weights = [9999, 3, 3, 3, 3]  # AI, Tech, Virus, Program, Firewall
+
+        # P1 sum - P2 sum, defender is P1 and attacker is P2 , therefore defender is maximizing and attacker is minimizing
+        unit_count_p1, unit_count_p2 = [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]  # AI, Tech, Virus, Program, Firewall
+        # get the number of units for each player
+        for p1_unit in game.player_units(defender):
+            unit_count_p1[p1_unit[1].type.value] += 1
+
+        for p2_unit in game.player_units(attacker):
+            unit_count_p2[p2_unit[1].type.value] += 1
+
+        sum_p1, sum_p2 = 0, 0
+        for unit in [0, 1, 2, 3, 4]:  # AI, Tech, Virus, Program, Firewall
+            sum_p1 = sum_p1 + (unit_weights[unit] * unit_count_p1[unit])
+            sum_p2 = sum_p2 + (unit_weights[unit] * unit_count_p2[unit])
+
+        player_unit_dif = sum_p1 - sum_p2
+
         potentional_self_destruct = self.self_destruct_potential(game, defender, attacker)
-        return (game.ai_unit_on_board(defender)[1].health - game.ai_unit_on_board(attacker)[1].health) - potentional_self_destruct
+        return (game.ai_unit_on_board(defender)[1].health - game.ai_unit_on_board(attacker)[1].health) + potentional_self_destruct + player_unit_dif
 
 
     # heuristic e2
@@ -108,7 +127,7 @@ class MinimaxHandler:
     '''
 
     def e2(self, game, defender, attacker) -> int:
-
+        self.game = game
         defender_ai = game.ai_unit_on_board(defender)
         attacker_ai = game.ai_unit_on_board(attacker)
         
@@ -161,7 +180,7 @@ class MinimaxHandler:
                             number_units_engaged_in_combat -= 1
 
         potentional_self_destruct = self.self_destruct_potential(game, defender, attacker)
-        return ai_health_dif - distance_to_defender_ai + inverse_damage_potential - number_units_engaged_in_combat - potentional_self_destruct
+        return ai_health_dif + distance_to_defender_ai + inverse_damage_potential + number_units_engaged_in_combat + potentional_self_destruct
 
 
     # TODO implement a if else statement that calculates heuristic depending on heuristic chosen by user.
