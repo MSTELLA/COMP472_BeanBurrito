@@ -197,11 +197,13 @@ class MinimaxHandler:
             # if time_limit and time.time() - start_time >= time_limit:
             elapsed_seconds = (datetime.now() - self.start_time).total_seconds()
             # print("iterative with depth :", str(depth) , " TIME - ", str(elapsed_seconds) )
-            if elapsed_seconds >= self.time_limit-0.5:
+            if time_limit > 1 and elapsed_seconds >= self.time_limit - 1:
                 # print("OUT OF TIME - ", str(elapsed_seconds) )
                 return best_val, best_move
+            if time_limit <= 1 and elapsed_seconds >= self.time_limit - 1:
+                return best_val, best_move
 
-            # self.current_Tree.root = self.current_Tree.expand_tree_1_level() # expands on the current leaves 
+            # self.current_Tree.root = self.current_Tree.expand_tree_1_level() # expands on the current leaves
         # iterate through each leaf or better nodes from a specific level and apply expand_one_node to them
             current_leaves = list(self.current_Tree.root.leaves)
             for leaf in current_leaves:
@@ -213,6 +215,12 @@ class MinimaxHandler:
                 if not alpha_beta and elapsed_seconds >= self.time_limit- (self.time_limit*2)/5:
                     # print("OUT OF TIME while creating a node - ", str(elapsed_seconds) )
                     break
+
+            if time_limit > 1 and elapsed_seconds >= self.time_limit-1:
+                # print("OUT OF TIME - ", str(elapsed_seconds) )
+                return best_val, best_move
+            if time_limit <= 1 and elapsed_seconds >= self.time_limit-1:
+                return best_val, best_move
 
 
             current_val, current_move = self.minimax(self.current_Tree.root,depth,alpha_beta)  # note default alpha beta is used
