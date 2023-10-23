@@ -200,7 +200,7 @@ class MinimaxHandler:
             if time_limit > 1 and elapsed_seconds >= self.time_limit - 1:
                 # print("OUT OF TIME - ", str(elapsed_seconds) )
                 return best_val, best_move
-            if time_limit <= 1 and elapsed_seconds >= self.time_limit - 1:
+            if time_limit <= 1 and elapsed_seconds >= self.time_limit - 0.5:
                 return best_val, best_move
 
             # self.current_Tree.root = self.current_Tree.expand_tree_1_level() # expands on the current leaves
@@ -219,7 +219,7 @@ class MinimaxHandler:
             if time_limit > 1 and elapsed_seconds >= self.time_limit-1:
                 # print("OUT OF TIME - ", str(elapsed_seconds) )
                 return best_val, best_move
-            if time_limit <= 1 and elapsed_seconds >= self.time_limit-1:
+            if time_limit <= 1 and elapsed_seconds >= self.time_limit - 0.5:
                 return best_val, best_move
 
 
