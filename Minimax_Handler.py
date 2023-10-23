@@ -16,6 +16,7 @@ class MinimaxHandler:
     totalTurns = None
     turnsPlayed = None
     tree_fully_traversed = True
+    timeRemaining = None
 
     def set_gametree_root(self, current_game):
         """ creates GameTree having the current game as its root. Used for iterative level creation and traversal."""
@@ -228,6 +229,7 @@ class MinimaxHandler:
 
             # self.current_Tree.root = self.current_Tree.expand_tree_1_level() # expands on the current leaves 
         # iterate through each leaf or better nodes from a specific level and apply expand_one_node to them
+            self.tree_fully_traversed = True
             current_leaves = list(self.current_Tree.root.leaves)
             for leaf in current_leaves:
                 if self.tree_fully_traversed:
@@ -244,7 +246,7 @@ class MinimaxHandler:
 
             timeRemaining = self.time_limit - (datetime.now() - self.start_time).total_seconds()
             print(timeRemaining)
-            current_val, current_move = self.minimax(self.current_Tree.root,depth,alpha_beta,timeRemaining)  # note default alpha beta is used
+            current_val, current_move, timeRemaining = self.minimax(self.current_Tree.root,depth,alpha_beta,timeRemaining)  # note default alpha beta is used
             # print(" score ", str(current_val), " & move ", current_move, " at depth of search ", str(depth))
             if current_val is not None:
                 best_val, best_move = current_val, current_move
@@ -262,12 +264,12 @@ class MinimaxHandler:
             e_node = self.calculate_heuristic(node)
             # print("REACHED LEAF ", str(node.get_attr("move")), "at level ", str(node.depth), " with e(n): ", str(e_node))
             self.tree_fully_traversed = True
-            return e_node, node.get_attr("move")
+            return e_node, node.get_attr("move"),timeRemaining - (datetime.now() - self.start_time).total_seconds()
 
-        if timeRemaining - 3 < (datetime.now() - self.minimax_start_time).total_seconds() and not node.is_root:
+        if timeRemaining - 3 < (datetime.now() - self.start_time).total_seconds() and not node.is_root:
             self.tree_fully_traversed = False
             e_node = self.calculate_heuristic(node)
-            return e_node, node.get_attr("move")
+            return e_node, node.get_attr("move"), timeRemaining - (datetime.now() - self.start_time).total_seconds()
 
 
 
@@ -280,7 +282,7 @@ class MinimaxHandler:
 
                 # we are recursively calling the minimax player where the maximizing player is now false
                 # At this depth it is the minimizing players turn (Attackers)
-                currentEval, currentMove = self.minimax(child, depth - 1, alpha_beta, timeRemaining, alpha,beta)
+                currentEval, currentMove, timeRemaining = self.minimax(child, depth - 1, alpha_beta, timeRemaining, alpha,beta)
 
                 # In suggest_move we are storing the returns in a two variable tuple, therefor need to store best move
                 if currentEval > maxEval:
@@ -294,7 +296,7 @@ class MinimaxHandler:
                     if beta <= alpha:
                         break
 
-            return maxEval, bestMove
+            return maxEval, bestMove,timeRemaining - (datetime.now() - self.start_time).total_seconds()
 
         # Attacker Player Logic
         if node.get_attr("minimax") == "MIN":
@@ -305,7 +307,7 @@ class MinimaxHandler:
                 # we are recursively calling the minimax player where the maximizing player is now True
                 # At this depth it is the minimizing players turn (Attackers)
 
-                currentEval, currentMove = self.minimax(child, depth - 1, alpha_beta, timeRemaining, alpha, beta)
+                currentEval, currentMove, timeRemaining = self.minimax(child, depth - 1, alpha_beta, timeRemaining, alpha, beta)
 
                 if currentEval < minEval:
                     minEval = currentEval
@@ -318,7 +320,7 @@ class MinimaxHandler:
                     if beta <= alpha:
                         break
 
-            return minEval, bestMove
+            return minEval, bestMove,timeRemaining - (datetime.now() - self.start_time).total_seconds()
 
     def generate_branching_factor_info(self):
         non_leaves_nodes = [node for node in list(self.current_Tree.root.descendants) if node.is_leaf == False]
