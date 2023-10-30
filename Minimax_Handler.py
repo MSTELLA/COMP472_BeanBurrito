@@ -258,6 +258,11 @@ class MinimaxHandler:
             # print("REACHED LEAF ", str(node.get_attr("move")), "at level ", str(node.depth), " with e(n): ", str(e_node))
             return e_node, node.get_attr("move")
 
+        elapsed_seconds = (datetime.now() - self.start_time).total_seconds()
+        if elapsed_seconds >= self.time_limit:
+            outOfTimeNode = self.calculate_heuristic(node)
+            return outOfTimeNode, node.get_attr("move")
+
 
         # Defender player logic
         if node.get_attr("minimax") == "MAX":
